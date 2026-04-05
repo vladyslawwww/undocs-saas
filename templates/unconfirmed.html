@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex-grow flex items-center justify-center bg-gray-50 py-8 px-4">
+    <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+        
+        <div class="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        </div>
+
+        <h1 class="text-xl font-bold text-slate-900 mb-1">Verify Account</h1>
+        <p class="text-slate-500 mb-6 text-sm">
+            Enter the code sent to <br><strong class="text-slate-700">{{ current_user.email }}</strong>
+        </p>
+
+        <form method="POST" action="{{ url_for('auth.unconfirmed') }}">
+            <div class="mb-6">
+                <input type="text" name="code" placeholder="000000" maxlength="6" required autocomplete="off"
+                       class="w-full text-center text-3xl tracking-[0.3em] font-bold py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition text-slate-800 placeholder-gray-200">
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 text-sm">
+                Verify Code
+            </button>
+        </form>
+        
+        <div class="mt-6 pt-4 border-t border-gray-50 flex justify-between items-center text-xs">
+            <a href="{{ url_for('auth.resend_confirmation') }}" class="text-blue-600 font-medium hover:text-blue-800">Resend Code</a>
+            <a href="{{ url_for('auth.logout') }}" class="text-slate-400 hover:text-slate-600">Log out</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

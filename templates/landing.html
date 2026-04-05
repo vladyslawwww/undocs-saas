@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative bg-slate-900 overflow-hidden">
+    <!-- Abstract Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-slate-900"></div>
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 md:w-96 md:h-96 rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
+    
+    <div class="container mx-auto px-6 py-16 md:py-24 relative z-10 text-center">
+        <span class="inline-block py-1 px-3 rounded-full bg-blue-900/50 border border-blue-700 text-blue-300 text-[10px] md:text-xs font-bold uppercase tracking-wide mb-6">
+            New: Gemini 2.5 Integration
+        </span>
+        <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-tight">
+            Stop typing.<br>Start <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">automating.</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed px-4">
+            Transform invoices, contracts, and receipts into structured JSON data in seconds using our next-generation AI pipeline.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-4 px-4">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-500 transition shadow-lg shadow-blue-900/50 text-center">
+                    Go to Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.register') }}" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-500 transition shadow-lg shadow-blue-900/50 text-center">
+                    Start for Free
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="w-full sm:w-auto bg-slate-800/50 backdrop-blur text-white border border-slate-700 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-slate-800 transition text-center">
+                    Live Demo
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="py-16 md:py-20 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+            <!-- Feature 1 -->
+            <div class="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-lg transition">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">Define Schemas</h3>
+                <p class="text-slate-500 leading-relaxed">Simply tell the AI what you want (e.g., "Invoice Number") and it finds it instantly.</p>
+            </div>
+            <!-- Feature 2 -->
+            <div class="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-lg transition">
+                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">Human Verification</h3>
+                <p class="text-slate-500 leading-relaxed">Review low-confidence extractions with our split-screen UI before syncing.</p>
+            </div>
+            <!-- Feature 3 -->
+            <div class="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-lg transition">
+                <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">Webhook Sync</h3>
+                <p class="text-slate-500 leading-relaxed">Automatically push clean JSON data to your ERP, CRM, or Database.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

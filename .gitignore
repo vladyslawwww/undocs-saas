@@ -1,0 +1,11 @@
+undocs-service-account.json
+.venv/
+instance/
+.db
+.pyc
+.env
+*.json
+__pycache__
+stripe.exe
+*.pdf
+undocs.db

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex-grow flex flex-col items-center justify-center bg-gray-50 py-8 px-4">
+    
+    <div class="text-center mb-8">
+        <span class="text-blue-600 font-bold tracking-wider uppercase text-[10px] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Early Access</span>
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mt-3 mb-1">Upgrade to Pro</h1>
+        <p class="text-slate-500 text-sm md:text-base">Unlock the full power of the Gemini 2.5 pipeline.</p>
+    </div>
+
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-gray-100 overflow-hidden relative">
+        <div class="absolute top-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+
+        <div class="p-6 text-center border-b border-gray-100">
+            <div class="flex items-center justify-center gap-1">
+                <span class="text-4xl font-bold text-slate-900">$20</span>
+                <span class="text-slate-400 font-medium text-sm">/mo</span>
+            </div>
+            <p class="text-slate-400 text-xs mt-1">Cancel anytime.</p>
+        </div>
+
+        <div class="p-6 bg-gray-50/50">
+            <ul class="space-y-3 mb-6 text-sm text-slate-600">
+                <li class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Unlimited Workspaces</span>
+                </li>
+                <li class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span><strong>Gemini 2.5</strong> Vision AI</span>
+                </li>
+                <li class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>API & Webhooks</span>
+                </li>
+            </ul>
+
+            <form action="{{ url_for('auth.create_checkout_session') }}" method="POST">
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition shadow-lg shadow-slate-900/10 text-sm flex items-center justify-center gap-2">
+                    Pay with Stripe
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

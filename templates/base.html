@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undocs.ai - Intelligent Document Processing</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        html { scroll-behavior: smooth; }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div class="container mx-auto px-4 md:px-6 h-16 flex justify-between items-center">
+            
+            <!-- Brand -->
+            <a href="{{ url_for('main.landing') }}" class="flex items-center gap-2 group z-50 relative">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/30 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <span class="text-lg font-bold text-slate-900 tracking-tight">Undocs.ai</span>
+            </a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-6">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.dashboard') }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Dashboard</a>
+                    
+                    <div class="h-6 w-px bg-gray-200 mx-2"></div>
+                    
+                    <a href="{{ url_for('auth.logout') }}" class="text-sm font-medium text-slate-500 hover:text-red-600 transition">Log out</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition">Sign In</a>
+                    <a href="{{ url_for('auth.register') }}" class="bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">Get Started</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:bg-gray-100 rounded-lg focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay (Hidden by default) -->
+        <div id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 shadow-xl md:hidden flex-col p-4 space-y-4">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-gray-50 font-medium text-slate-700">Dashboard</a>
+                <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium">Log Out</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="block px-4 py-3 rounded-lg hover:bg-gray-50 font-medium text-slate-700">Sign In</a>
+                <a href="{{ url_for('auth.register') }}" class="block px-4 py-3 rounded-lg bg-blue-600 text-white font-bold text-center">Get Started</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mx-auto px-4 md:px-6 mt-6">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-xl text-sm font-medium flex items-center gap-3 shadow-sm animate-fade-in-down
+                        {{ 'bg-red-50 text-red-700 border border-red-100' if category == 'danger' else 
+                           'bg-green-50 text-green-700 border border-green-100' if category == 'success' else 
+                           'bg-blue-50 text-blue-700 border border-blue-100' if category == 'info' else
+                           'bg-yellow-50 text-yellow-700 border border-yellow-100' }}">
+                         <!-- Icons... (Same as before) -->
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 mt-12 py-8">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-400 gap-4 text-center md:text-left">
+            <p>&copy; 2026 Undocs.ai by Vladyslav Buriachok.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-slate-600">Privacy</a>
+                <a href="#" class="hover:text-slate-600">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        });
+    </script>
+</body>
+</html>
