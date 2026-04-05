@@ -19,7 +19,7 @@
 ## 🎬 See it in action (30s Demo)
 
 <p align="center">
-  <video src="./assets/undocs-quick-demo.mp4" autoplay loop muted playsinline width="100%"></video>
+  <video src="https://github.com/user-attachments/assets/1e1ade6a-0751-4e42-a003-f838c023cf8a" autoplay loop muted playsinline width="100%"></video>
 </p>
 
 
@@ -115,7 +115,7 @@
 
 ### 1. Clone & Env
 ```bash
-git clone <maybe i will create a repo>
+git clone https://github.com/vladyslawwww/undocs-saas
 cd undocs-ai
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
