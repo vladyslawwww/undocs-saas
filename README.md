@@ -109,14 +109,30 @@
 *   **Payments:** Stripe API + CLI for Webhook tunneling.
 *   **Email:** SMTP (Gmail/SendGrid support).
 
+## 📂 Project Architecture
 
+```text
+undocs-saas/
+├── .github/workflows/  # CI/CD Pipelines
+├── assets/             # Demo media & UI Showcase
+├── demo_scripts/       # API sender/receiver webhooks for E2E testing
+├── instance/           # SQLite Database (GitIgnored)
+├── routes/             # Flask Blueprints (API & Frontend Routing)
+├── services/           # Core business logic (Gemini AI & Email integrations)
+├── static/             # CSS (Tailwind) & JS (Alpine)
+├── templates/          # Jinja2 HTML Views
+├── tools/              # Utility & testing scripts
+├── app.py              # Application factory & entry point
+├── requirements.txt    # Dependencies
+└── .env.example        # Environment variables template
+```
 
 ## ⚙️ Installation & Local Setup
 
 ### 1. Clone & Env
 ```bash
 git clone https://github.com/vladyslawwww/undocs-saas
-cd undocs-ai
+cd undocs-saas
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
