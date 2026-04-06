@@ -130,6 +130,24 @@ def onboarding_choice():
 @login_required
 def create_workspace():
     if request.method == "POST":
+        # Check for existing trial workspaces owned by this user
+        existing_trial = (
+            ProjectMembership.query.join(Project)
+            .filter(
+                ProjectMembership.user_id == current_user.id,
+                ProjectMembership.role == "owner",
+                Project.subscription_status == "trial",
+            )
+            .first()
+        )
+
+        if existing_trial:
+            flash(
+                "You already have a trial workspace. Please upgrade it to Pro to create more.",
+                "warning",
+            )
+            return redirect(url_for("main.dashboard"))
+
         project_name = request.form.get("project_name")
 
         # 1. Create the Project in TRIAL mode

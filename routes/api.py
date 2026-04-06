@@ -1,5 +1,6 @@
 import uuid
 
+import fitz
 from flask import Blueprint, current_app, jsonify, request
 from werkzeug.utils import secure_filename
 
@@ -14,6 +15,18 @@ ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def get_page_count(file_bytes, mime_type):
+    """Returns the number of pages in a PDF or 1 for images."""
+    if "pdf" in mime_type:
+        try:
+            with fitz.open(stream=file_bytes, filetype="pdf") as doc:
+                return doc.page_count
+        except Exception as e:
+            print(f"PDF Page Count Error: {e}")
+            return 1  # Fallback
+    return 1  # Images are always 1 page
 
 
 @api_bp.route("/ingest", methods=["POST"])
@@ -50,16 +63,27 @@ def ingest():
     if not schema:
         return jsonify({"error": f"Schema '{schema_name}' not found"}), 404
 
-    # 1. Generate Secure Filename & Read Bytes
-    original_name = secure_filename(file.filename)
-    storage_name = f"workspace_{project.id}/{uuid.uuid4().hex}_{original_name}"
+    # 1. Read bytes early to count pages
     file_bytes = file.read()
     mime_type = file.mimetype
 
-    # 2. Upload to S3/Cloudflare R2
+    page_count = get_page_count(file_bytes, mime_type)
+
+    # 2. Check if this specific upload exceeds remaining quota
+    if project.pages_used + page_count > project.page_limit:
+        return jsonify(
+            {
+                "error": "Quota exceeded",
+                "message": f"This document has {page_count} pages, but you only have {project.page_limit - project.pages_used} pages left.",
+            }
+        ), 402
+
+    # 3. Proceed with Upload to R2
+    original_name = secure_filename(file.filename)
+    storage_name = f"workspace_{project.id}/{uuid.uuid4().hex}_{original_name}"
     upload_file_to_r2(file_bytes, storage_name, mime_type)
 
-    # 3. Create DB Entry
+    # 4. Create DB Entry
     doc = Document(
         filename=original_name,
         storage_filename=storage_name,
@@ -68,13 +92,11 @@ def ingest():
     )
     db.session.add(doc)
 
-    # --- START: INCREMENT COUNTER ---
-    # Atomically increment the usage counter
-    project.pages_used += 1
+    # 5. Increment by ACTUAL PAGE COUNT
+    project.pages_used += page_count
     db.session.commit()
-    # --- END: INCREMENT COUNTER ---
 
-    # 4. Publish to Serverless Queue
+    # 6. Publish to Serverless Queue
     success = publish_document_job(doc.id)
 
     if not success:
