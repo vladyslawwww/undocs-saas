@@ -23,14 +23,14 @@ def stripe_webhook():
 
     # --- HANDLE EVENTS ---
 
-    # 1. Subscription Created
+    # 1. Subscription Created / Checkout Completed
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
 
-        # Project ID passed in client_reference_id
-        project_id = session.get("client_reference_id")
-        stripe_sub_id = session.get("subscription")
-        stripe_customer_id = session.get("customer")
+        # Use attribute access instead of .get()
+        project_id = getattr(session, "client_reference_id", None)
+        stripe_sub_id = getattr(session, "subscription", None)
+        stripe_customer_id = getattr(session, "customer", None)
 
         if project_id:
             project = db.session.get(Project, int(project_id))
