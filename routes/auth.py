@@ -129,37 +129,29 @@ def onboarding_choice():
 @login_required
 def create_workspace():
     if request.method == "POST":
-        # Check for existing trial workspaces owned by this user
-        existing_trial = (
-            ProjectMembership.query.join(Project)
-            .filter(
-                ProjectMembership.user_id == current_user.id,
-                ProjectMembership.role == "owner",
-                Project.subscription_status == "trial",
-            )
-            .first()
-        )
-
-        if existing_trial:
+        # 1. Check if user has EVER used a trial
+        if current_user.has_used_trial:
             flash(
-                "You already have a trial workspace. Please upgrade it to Pro to create more.",
+                "You have already used your free trial. Please upgrade an existing workspace or create a Pro workspace.",
                 "warning",
             )
             return redirect(url_for("main.dashboard"))
 
         project_name = request.form.get("project_name")
 
-        # 1. Create the Project in TRIAL mode
+        # 2. Create the Trial Project
         new_project = Project(
             name=project_name,
-            subscription_status="trial",  # Changed from pending_payment
-            page_limit=10,  # Free tier limit
+            subscription_status="trial",
+            page_limit=10,
             pages_used=0,
         )
         db.session.add(new_project)
-        db.session.commit()
 
-        # 2. Add User as Owner
+        # 3. Mark the USER as having consumed their trial
+        current_user.has_used_trial = True
+
+        # 4. Create Membership
         mem = ProjectMembership(
             user_id=current_user.id, project_id=new_project.id, role="owner"
         )
@@ -171,8 +163,6 @@ def create_workspace():
             "success",
         )
         return redirect(url_for("main.project_view", project_id=new_project.id))
-
-    return render_template("setup_project.html")
 
 
 @auth_bp.route("/workspace/success")

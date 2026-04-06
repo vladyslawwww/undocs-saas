@@ -89,28 +89,29 @@
     {% if projects %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for p in projects %}
-        {% set is_active = (p.project.subscription_status == 'active') %}
+        
+        <!-- 1. DEFINE ACCESSIBILITY LOGIC -->
+        {% set status = p.project.subscription_status %}
+        {% set is_accessible = (status == 'active' or status == 'trial') %}
 
-        <div
-            class="relative rounded-2xl border p-6 md:p-8 transition duration-300 h-full flex flex-col overflow-hidden group
-            {{ 'bg-white border-gray-200 hover:shadow-xl hover:border-blue-300 hover:shadow-blue-900/5' if is_active else 'bg-slate-50 border-slate-200' }}">
+        <div class="relative rounded-2xl border p-6 md:p-8 transition duration-300 h-full flex flex-col overflow-hidden group
+            {{ 'bg-white border-gray-200 hover:shadow-xl hover:border-blue-300 hover:shadow-blue-900/5' if is_accessible else 'bg-slate-50 border-slate-200' }}">
 
-            <!-- FIXED LINK: z-10 ensures it is ON TOP of the content below -->
-            {% if is_active %}
+            <!-- 2. ENABLE LINK FOR TRIAL & ACTIVE -->
+            {% if is_accessible %}
             <a href="{{ url_for('main.project_view', project_id=p.project.id) }}" class="absolute inset-0 z-10"></a>
             {% endif %}
 
-            <!-- Decoration: z-0 -->
-            {% if is_active %}
-            <div
-                class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-gray-50 to-white rounded-bl-full -mr-4 -mt-4 transition group-hover:from-blue-50 group-hover:to-white z-0">
+            <!-- Decoration -->
+            {% if is_accessible %}
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-gray-50 to-white rounded-bl-full -mr-4 -mt-4 transition group-hover:from-blue-50 group-hover:to-white z-0">
             </div>
             {% endif %}
 
-            <!-- Content: Removed 'z-10' so it sits under the link (but visible) -->
             <div class="relative flex flex-col h-full justify-between pointer-events-none">
 
-                <div class="{{ 'opacity-60 grayscale' if not is_active }}">
+                <!-- 3. REMOVE GRAYSCALE FOR TRIAL -->
+                <div class="{{ 'opacity-60 grayscale' if not is_accessible }}">
                     <div class="flex flex-wrap justify-between items-start mb-6 gap-2">
                         <div class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border
                             {{ 'bg-slate-900 text-white border-slate-900' if p.role == 'owner' else 
@@ -119,32 +120,23 @@
                             {{ p.role }}
                         </div>
 
-                        {% if is_active %}
-                        {% if p.review_count > 0 %}
-                        <div
-                            class="flex items-center gap-1.5 text-yellow-700 text-xs font-bold bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100 shadow-sm">
-                            <span class="relative flex h-2 w-2">
-                                <span
-                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-                            </span>
-                            {{ p.review_count }} Action
+                        <!-- 4. DYNAMIC STATUS BADGES -->
+                        <div class="flex items-center gap-2">
+                            {% if status == 'active' %}
+                                <div class="text-green-700 text-[10px] font-bold bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">PRO</div>
+                            {% elif status == 'trial' %}
+                                <div class="text-blue-700 text-[10px] font-bold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">TRIAL</div>
+                            {% else %}
+                                <div class="text-yellow-700 text-[10px] font-bold bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100">PAYMENT PENDING</div>
+                            {% endif %}
                         </div>
-                        {% endif %}
-                        {% else %}
-                        <div
-                            class="flex items-center gap-1.5 text-yellow-700 text-[10px] font-bold bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100">
-                            PAYMENT PENDING
-                        </div>
-                        {% endif %}
                     </div>
 
+                    <!-- Quota Meter -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monthly
-                                Quota</span>
-                            <span class="text-[10px] font-bold text-slate-600">{{ p.project.pages_used }} / {{
-                                p.project.page_limit }}</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monthly Quota</span>
+                            <span class="text-[10px] font-bold text-slate-600">{{ p.project.pages_used }} / {{ p.project.page_limit }}</span>
                         </div>
                         <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                             <div class="h-1.5 rounded-full transition-all duration-700 
@@ -154,58 +146,41 @@
                         </div>
                     </div>
 
-                    <h3
-                        class="text-xl md:text-2xl font-bold text-slate-900 mb-2 {{ 'group-hover:text-blue-600' if is_active }} transition truncate">
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-2 {{ 'group-hover:text-blue-600' if is_accessible }} transition truncate">
                         {{ p.project.name }}
                     </h3>
                     <p class="text-sm text-slate-500">
-                        {% if is_active %}
                         Processed <strong class="text-slate-700">{{ p.doc_count }}</strong> documents.
-                        {% else %}
-                        Processing payment...
-                        {% endif %}
                     </p>
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
-                    {% if is_active %}
+                    {% if is_accessible %}
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Open Workspace</span>
-                    <div
-                        class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center {{ 'group-hover:bg-blue-600 group-hover:text-white' if is_active }} transition">
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center {{ 'group-hover:bg-blue-600 group-hover:text-white' if is_accessible }} transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                         </svg>
                     </div>
                     {% else %}
+                    <!-- If Locked (Inactive/Pending Payment) -->
                     <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider flex items-center gap-1">
                         Action Needed
                     </span>
 
-                    <!-- BUTTONS: z-20 and pointer-events-auto ensures they are clickable above the card logic -->
                     <div class="flex items-center gap-2 relative z-20 pointer-events-auto">
                         {% if p.role == 'owner' %}
-                        <!-- Delete Button -->
                         <form action="{{ url_for('main.delete_project', project_id=p.project.id) }}" method="POST"
                             onsubmit="return confirm('Are you sure you want to discard this workspace?');">
-                            <button type="submit"
-                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition"
-                                title="Discard Workspace">
+                            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-slate-400 hover:text-red-600 hover:border-red-200 transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
                             </button>
                         </form>
-
-                        <!-- Pay Button -->
-                        <a href="{{ url_for('auth.retry_payment', project_id=p.project.id) }}"
-                            class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-700 transition shadow-lg shadow-slate-900/10 flex items-center gap-1">
+                        <a href="{{ url_for('auth.retry_payment', project_id=p.project.id) }}" class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-700 transition">
                             Pay Now
                         </a>
-                        {% else %}
-                        <span class="text-xs text-slate-400 font-medium">Owner must pay</span>
                         {% endif %}
                     </div>
                     {% endif %}

@@ -24,6 +24,7 @@ class User(UserMixin, db.Model):
     verification_code = db.Column(db.String(6), nullable=True)
     verification_expiry = db.Column(db.DateTime, nullable=True)
     memberships = db.relationship("ProjectMembership", backref="user", lazy=True)
+    has_used_trial = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

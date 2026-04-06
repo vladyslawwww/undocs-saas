@@ -148,12 +148,8 @@ def project_view(project_id):
 
     project = Project.query.get_or_404(project_id)
 
-    # GATEKEEPER LOGIC
     if project.subscription_status not in ["active", "trial"]:
-        flash(
-            f"Workspace '{project.name}' is locked. Status: {project.subscription_status}",
-            "warning",
-        )
+        flash(f"Workspace is inactive ({project.subscription_status}).", "warning")
         return redirect(url_for("main.dashboard"))
 
     schemas = project.schemas
