@@ -1,21 +1,18 @@
+# services/ai_service.py
 import json
-import os
 
-import requests
-import vertexai
-from vertexai.generative_models import GenerativeModel, Part
+from google import genai
+from google.genai import types
 
 from models import DocSchema, Document, Project, db
 
-# Initialize Vertex AI
-project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
-location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-vertexai.init(project=project_id, location=location)
+# The Client automatically picks up the GEMINI_API_KEY from your .env file
+client = genai.Client()
 
 
-def process_document_background(app, doc_id):
+def process_document_logic(app, doc_id, file_bytes, mime_type):
     with app.app_context():
-        doc = Document.query.get(doc_id)
+        doc = db.session.get(Document, doc_id)
         if not doc:
             return
 
@@ -23,7 +20,7 @@ def process_document_background(app, doc_id):
         db.session.commit()
 
         try:
-            schema = DocSchema.query.get(doc.schema_id)
+            schema = db.session.get(DocSchema, doc.schema_id)
             schema_json_str = json.dumps(schema.structure, indent=2)
 
             prompt = f"""
@@ -34,41 +31,36 @@ def process_document_background(app, doc_id):
             {schema_json_str}
 
             CRITICAL INSTRUCTIONS:
-            1. The 'description' field in the schema is your PRIMARY instruction for what to find.
-            2. Match the 'type' exactly (string, number, boolean, date, array).
+            1. The 'description' field is your PRIMARY instruction.
+            2. Match the 'type' exactly.
             3. For 'date' fields, convert to ISO8601 (YYYY-MM-DD).
-            4. For 'number' fields, remove currency symbols and commas.
-            5. Return ONLY valid JSON.
+            4. Return ONLY valid JSON without markdown wrapping.
             """
 
-            model = GenerativeModel("gemini-2.5-flash")
+            # 1. Create a Part object using the file bytes directly
+            file_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
 
-            file_path = os.path.join("static/uploads", doc.storage_filename)
+            # 2. Configure the generation (strict JSON output)
+            config = types.GenerateContentConfig(
+                response_mime_type="application/json", temperature=0.0
+            )
 
-            with open(file_path, "rb") as f:
-                file_bytes = f.read()
-
-            mime_type = "application/pdf"
-            if doc.filename.lower().endswith((".png", ".jpg", ".jpeg")):
-                mime_type = "image/jpeg"
-
-            response = model.generate_content(
-                [Part.from_data(data=file_bytes, mime_type=mime_type), prompt],
-                generation_config={
-                    "response_mime_type": "application/json",
-                    "temperature": 0.0,
-                },
+            # 3. Call the API using the new unified Client
+            response = client.models.generate_content(
+                model="gemini-2.5-flash", contents=[file_part, prompt], config=config
             )
 
             result_json = response.text.strip()
-            if result_json.startswith("```json"):
-                result_json = result_json.split("```json")[1].split("```")[0]
+
+            # Clean up potential markdown formatting from Gemini
+            if result_json.startswith("```"):
+                result_json = result_json.strip("```").removeprefix("json").strip()
 
             doc.extracted_data = json.loads(result_json)
             doc.status = "REVIEW_NEEDED"
 
         except Exception as e:
-            print(f"Vertex AI Error: {e}")
+            print(f"Gemini API Error: {e}")
             doc.status = "ERROR"
             doc.extracted_data = {"error": str(e)}
 
@@ -77,8 +69,10 @@ def process_document_background(app, doc_id):
 
 def trigger_webhook(doc):
     """Sends verified data to the user's receiver script"""
-    schema = DocSchema.query.get(doc.schema_id)
-    project = Project.query.get(schema.project_id)
+    import requests
+
+    schema = db.session.get(DocSchema, doc.schema_id)
+    project = db.session.get(Project, schema.project_id)
 
     if project.webhook_url:
         try:
@@ -89,7 +83,7 @@ def trigger_webhook(doc):
                     "filename": doc.filename,
                     "final_data": doc.extracted_data,
                     "status": "COMPLETED",
-                    "provider": "Google Vertex AI (Gemini 2.5 Flash)",
+                    "provider": "Google AI Studio (Gemini 2.5 Flash)",
                 },
                 timeout=5,
             )

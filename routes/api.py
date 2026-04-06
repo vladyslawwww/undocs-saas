@@ -1,4 +1,4 @@
-import os
+# routes/api.py
 import threading
 import uuid
 
@@ -6,9 +6,16 @@ from flask import Blueprint, current_app, jsonify, request
 from werkzeug.utils import secure_filename
 
 from models import DocSchema, Document, Project, db
-from services.ai_service import process_document_background
+from services.ai_service import process_document_logic
+from services.storage_service import upload_file_to_r2
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
+
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg"}
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @api_bp.route("/ingest", methods=["POST"])
@@ -25,31 +32,40 @@ def ingest():
     file = request.files["file"]
     schema_name = request.form.get("schema_name")
 
+    if not file or not allowed_file(file.filename):
+        return jsonify(
+            {"error": "Invalid file type. Only PDF and Images allowed."}
+        ), 400
+
     schema = DocSchema.query.filter_by(project_id=project.id, name=schema_name).first()
     if not schema:
-        return jsonify({"error": f"Schema '{schema_name}' not found in project"}), 404
+        return jsonify({"error": f"Schema '{schema_name}' not found"}), 404
 
-    # --- UNIQUE FILENAME GENERATION ---
+    # 1. Generate Secure Filename & Read Bytes
     original_name = secure_filename(file.filename)
-    unique_prefix = str(uuid.uuid4())[:8]
-    storage_name = f"{unique_prefix}_{original_name}"
+    storage_name = f"workspace_{project.id}/{uuid.uuid4().hex}_{original_name}"
 
-    # Save file
-    save_path = os.path.join("static/uploads", storage_name)
-    file.save(save_path)
+    file_bytes = file.read()
+    mime_type = file.mimetype
 
-    # Create DB Entry
+    # 2. Upload to S3/Cloudflare R2
+    upload_file_to_r2(file_bytes, storage_name, mime_type)
+
+    # 3. Create DB Entry
     doc = Document(
-        filename=original_name,  # User sees this
-        storage_filename=storage_name,  # Disk uses this
+        filename=original_name,
+        storage_filename=storage_name,
         schema_id=schema.id,
         status="QUEUED",
     )
     db.session.add(doc)
     db.session.commit()
 
-    # Start AI Thread
+    # 4. Start processing
+    # Note: We are temporarily keeping threading. We will replace this with Upstash Qstash next!
     app_obj = current_app._get_current_object()
-    threading.Thread(target=process_document_background, args=(app_obj, doc.id)).start()
+    threading.Thread(
+        target=process_document_logic, args=(app_obj, doc.id, file_bytes, mime_type)
+    ).start()
 
     return jsonify({"status": "queued", "doc_id": doc.id, "file": original_name})

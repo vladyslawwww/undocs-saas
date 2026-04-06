@@ -3,7 +3,8 @@ flask-sqlalchemy
 flask-login
 flask-mail
 werkzeug
-google-cloud-aiplatform
 stripe
 requests
 python-dotenv
+google-genai
+boto3

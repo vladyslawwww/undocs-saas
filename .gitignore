@@ -1,11 +1,31 @@
-undocs-service-account.json
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 .venv/
-instance/
-.db
-.pyc
+venv/
+ENV/
+
+# Environment Variables (CRITICAL)
 .env
-*.json
-__pycache__
+.env.local
+.env.*
+service-account.json
+
+# Databases
+*.db
+*.sqlite3
+instance/
+
+# Development
+create_complete_context.py
+full_project_context.txt
 stripe.exe
-*.pdf
-undocs.db
+
+# Uploads / Local Storage
+static/uploads/*
+!static/uploads/.gitkeep
+
+# OS generated files
+.DS_Store
+Thumbs.db
