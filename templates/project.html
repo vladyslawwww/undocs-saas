@@ -118,6 +118,47 @@
 
         <!-- RIGHT COLUMN: Tools -->
         <div class="space-y-8 order-1 lg:order-2">
+            <!-- NEW: WORKSPACE QUOTA CARD -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-900">Workspace Quota</h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500 font-medium">Processed</span>
+                        <span class="text-slate-900 font-bold">{{ project.pages_used }} / {{ project.page_limit
+                            }}</span>
+                    </div>
+
+                    {% set usage = (project.pages_used / project.page_limit * 100)|round|int if project.page_limit > 0
+                    else 0 %}
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="h-2.5 rounded-full transition-all duration-1000 
+                    {% if usage > 90 %}bg-red-500{% elif usage > 70 %}bg-amber-500{% else %}bg-blue-600{% endif %}"
+                            style="width: {{ usage }}%">
+                        </div>
+                    </div>
+
+                    {% if usage >= 100 %}
+                    <div class="p-2 bg-red-50 border border-red-100 rounded-lg">
+                        <p class="text-[10px] text-red-600 font-bold leading-tight">
+                            LIMIT REACHED: Processing paused. Please upgrade your plan.
+                        </p>
+                    </div>
+                    {% elif usage > 85 %}
+                    <p class="text-[10px] text-amber-600 font-medium">
+                        Nearly out of credits. Auto-extraction will pause soon.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- END QUOTA CARD -->
             <!-- SCHEMA LIBRARY -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="font-bold text-slate-900 mb-4 flex items-center justify-between">
