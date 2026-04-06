@@ -1,27 +1,36 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mx-auto px-4 md:px-6 py-8">
-    
     <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-8 border-b border-gray-100 gap-4">
+    <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-8 border-b border-gray-100 gap-4">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <a href="{{ url_for('main.dashboard') }}" class="text-slate-400 hover:text-slate-600 transition text-sm font-medium flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <a href="{{ url_for('main.dashboard') }}"
+                    class="text-slate-400 hover:text-slate-600 transition text-sm font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
                     Dashboard
                 </a>
                 <span class="text-gray-300">/</span>
-                <span class="text-[10px] md:text-xs uppercase font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded">{{ role }}</span>
+                <span
+                    class="text-[10px] md:text-xs uppercase font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded">{{
+                    role }}</span>
             </div>
-            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 truncate max-w-xs md:max-w-xl">{{ project.name }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 truncate max-w-xs md:max-w-xl">
+                {{ project.name }}
+            </h1>
         </div>
-        
+
         <div class="flex flex-col gap-2 w-full md:w-auto">
             {% if role_power[role] >= 3 %}
             <div class="bg-slate-50 px-4 py-2 rounded-xl border border-gray-200">
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">API KEY (SENDER)</p>
-                <code class="text-xs md:text-sm font-mono text-slate-700 select-all break-all">{{ project.api_key }}</code>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                    API KEY (SENDER)
+                </p>
+                <code
+                    class="text-xs md:text-sm font-mono text-slate-700 select-all break-all">{{ project.api_key }}</code>
             </div>
             {% endif %}
         </div>
@@ -29,14 +38,13 @@
 
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-        
         <!-- LEFT COLUMN: Documents (Queue) -->
         <div class="lg:col-span-2 space-y-8 order-2 lg:order-1">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                     <h2 class="text-lg font-bold text-slate-900">Document Queue</h2>
                 </div>
-                
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left whitespace-nowrap">
                         <thead class="bg-gray-50/50">
@@ -50,7 +58,10 @@
                         <tbody class="divide-y divide-gray-50">
                             {% for doc in docs %}
                             <tr class="hover:bg-gray-50/50 transition">
-                                <td class="px-6 py-4 font-medium text-slate-700 truncate max-w-[150px] md:max-w-[200px]">{{ doc.filename }}</td>
+                                <td
+                                    class="px-6 py-4 font-medium text-slate-700 truncate max-w-[150px] md:max-w-[200px]">
+                                    {{ doc.filename }}
+                                </td>
                                 <td class="px-6 py-4">
                                     <span class="px-2.5 py-1 rounded-lg text-[10px] md:text-xs font-bold border
                                         {{ 'bg-yellow-50 text-yellow-700 border-yellow-100' if doc.status=='PROCESSING' else 
@@ -60,28 +71,44 @@
                                         {{ doc.status }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-slate-400 text-xs md:text-sm">{{ doc.upload_date.strftime('%b %d, %H:%M') }}</td>
+                                <td class="px-6 py-4 text-slate-400 text-xs md:text-sm">
+                                    {{ doc.upload_date.strftime('%b %d, %H:%M') }}
+                                </td>
                                 <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
                                     <!-- Verify Button (Existing) -->
-                                    {% if doc.status == 'REVIEW_NEEDED' and role_power[role] >= 2 %}
-                                        <a href="{{ url_for('main.verify_doc', doc_id=doc.id) }}" 
-                                           class="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 text-xs font-medium transition shadow-sm shadow-blue-200">
-                                           Verify
-                                        </a>
+                                    {% if doc.status == 'REVIEW_NEEDED' and role_power[role] >= 2
+                                    %}
+                                    <a href="{{ url_for('main.verify_doc', doc_id=doc.id) }}"
+                                        class="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 text-xs font-medium transition shadow-sm shadow-blue-200">
+                                        Verify
+                                    </a>
                                     {% endif %}
 
                                     <!-- DELETE BUTTON (New - Admin+) -->
                                     {% if role_power[role] >= 3 %}
-                                        <form action="{{ url_for('main.delete_document', doc_id=doc.id) }}" method="POST" onsubmit="return confirm('Permanently delete this document?');" class="inline">
-                                            <button type="submit" class="text-slate-300 hover:text-red-500 transition p-1 rounded hover:bg-red-50" title="Delete Document">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </form>
+                                    <form action="{{ url_for('main.delete_document', doc_id=doc.id) }}" method="POST"
+                                        onsubmit="
+                      return confirm('Permanently delete this document?');
+                    " class="inline">
+                                        <button type="submit"
+                                            class="text-slate-300 hover:text-red-500 transition p-1 rounded hover:bg-red-50"
+                                            title="Delete Document">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="4" class="text-center py-12 text-slate-400">No documents yet. Use the API to ingest.</td></tr>
+                            <tr>
+                                <td colspan="4" class="text-center py-12 text-slate-400">
+                                    No documents yet. Use the API to ingest.
+                                </td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -91,124 +118,159 @@
 
         <!-- RIGHT COLUMN: Tools -->
         <div class="space-y-8 order-1 lg:order-2">
-
             <!-- SCHEMA LIBRARY -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="font-bold text-slate-900 mb-4 flex items-center justify-between">
                     <span>Schema Library</span>
-                    <span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-full">{{ schemas|length }} Active</span>
+                    <span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-full">{{ schemas|length }}
+                        Active</span>
                 </h3>
 
                 {% if schemas %}
-                    <div class="space-y-4">
-                        {% for s in schemas %}
-                        <div class="border border-gray-100 rounded-xl p-4 hover:border-blue-200 transition group bg-slate-50/50 hover:bg-white">
-                            
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h4 class="font-bold text-slate-800 text-sm">{{ s.name }}</h4>
-                                    <div class="flex gap-2 mt-1">
-                                        <!-- Edit Button (Opens Modal) -->
-                                        {% if role_power[role] >= 3 %}
-                                        <button onclick="openEditModal('{{ s.id }}', '{{ s.name }}')" class="text-[10px] text-blue-600 font-bold hover:underline">Edit JSON</button>
-                                        
-                                        <!-- Hidden textarea to store JSON for the modal JS to grab -->
-                                        <textarea id="schema-json-{{ s.id }}" class="hidden">{{ s.structure | tojson(indent=2) }}</textarea>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                
-                                {% if role_power[role] >= 3 %}
-                                <form action="{{ url_for('main.delete_schema', project_id=project.id, schema_id=s.id) }}" method="POST" onsubmit="return confirm('WARNING: Deleting this schema will delete ALL associated documents. Continue?');">
-                                    <button class="text-slate-300 hover:text-red-500 transition p-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <div class="space-y-4">
+                    {% for s in schemas %}
+                    <div
+                        class="border border-gray-100 rounded-xl p-4 hover:border-blue-200 transition group bg-slate-50/50 hover:bg-white">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">{{ s.name }}</h4>
+                                <div class="flex gap-2 mt-1">
+                                    <!-- Edit Button (Opens Modal) -->
+                                    {% if role_power[role] >= 3 %}
+                                    <button onclick="openEditModal('{{ s.id }}', '{{ s.name }}')"
+                                        class="text-[10px] text-blue-600 font-bold hover:underline">
+                                        Edit JSON
                                     </button>
-                                </form>
-                                {% endif %}
-                            </div>
 
-                            <!-- Smart Tag Display -->
-                            <div class="flex flex-wrap gap-2">
-                                {# Logic to handle both Old Flat Lists and New JSON Objects #}
-                                {% if s.structure is mapping and s.structure.get('properties') %}
-                                    <!-- It's a JSON Object Schema -->
-                                    {% for key, val in s.structure['properties'].items() %}
-                                        <span class="text-[10px] border border-gray-200 text-slate-500 px-2 py-1 rounded bg-white font-mono">{{ key }}</span>
-                                    {% endfor %}
-                                    {% if s.structure.get('type') == 'array' %}
-                                        <span class="text-[10px] border border-purple-200 text-purple-600 px-2 py-1 rounded bg-purple-50 font-bold">Nested Array</span>
+                                    <!-- Hidden textarea to store JSON for the modal JS to grab -->
+                                    <textarea id="schema-json-{{ s.id }}" class="hidden">
+{{ s.structure | tojson(indent=2) }}</textarea>
                                     {% endif %}
-                                {% elif s.structure is iterable and s.structure is not mapping %}
-                                    <!-- It's the Old List Format -->
-                                    {% for field in s.structure %}
-                                        <span class="text-[10px] border border-gray-200 text-slate-500 px-2 py-1 rounded bg-white">{{ field.key }}</span>
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="text-[10px] text-gray-400 italic">Complex/Raw JSON</span>
-                                {% endif %}
+                                </div>
                             </div>
 
+                            {% if role_power[role] >= 3 %}
+                            <form action="{{ url_for('main.delete_schema', project_id=project.id, schema_id=s.id) }}"
+                                method="POST" onsubmit="
+                  return confirm(
+                    'WARNING: Deleting this schema will delete ALL associated documents. Continue?',
+                  );
+                ">
+                                <button class="text-slate-300 hover:text-red-500 transition p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </form>
+                            {% endif %}
                         </div>
-                        {% endfor %}
+
+                        <!-- Smart Tag Display -->
+                        <div class="flex flex-wrap gap-2">
+                            {# Logic to handle both Old Flat Lists and New JSON Objects #} {%
+                            if s.structure is mapping and s.structure.get('properties') %}
+                            <!-- It's a JSON Object Schema -->
+                            {% for key, val in s.structure['properties'].items() %}
+                            <span
+                                class="text-[10px] border border-gray-200 text-slate-500 px-2 py-1 rounded bg-white font-mono">{{
+                                key }}</span>
+                            {% endfor %} {% if s.structure.get('type') == 'array' %}
+                            <span
+                                class="text-[10px] border border-purple-200 text-purple-600 px-2 py-1 rounded bg-purple-50 font-bold">Nested
+                                Array</span>
+                            {% endif %} {% elif s.structure is iterable and s.structure is not
+                            mapping %}
+                            <!-- It's the Old List Format -->
+                            {% for field in s.structure %}
+                            <span
+                                class="text-[10px] border border-gray-200 text-slate-500 px-2 py-1 rounded bg-white">{{
+                                field.key }}</span>
+                            {% endfor %} {% else %}
+                            <span class="text-[10px] text-gray-400 italic">Complex/Raw JSON</span>
+                            {% endif %}
+                        </div>
                     </div>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                        <p class="text-slate-400 text-xs">No schemas defined yet.</p>
-                    </div>
+                <div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <p class="text-slate-400 text-xs">No schemas defined yet.</p>
+                </div>
                 {% endif %}
             </div>
 
             <!-- CREATE SCHEMA (Tabs: Visual vs JSON) -->
-             {% if role_power[role] >= 3 %}
+            {% if role_power[role] >= 3 %}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-8" x-data="{ mode: 'visual' }">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-slate-900">Define Schema</h3>
-                    
+
                     <!-- Tab Switcher -->
                     <div class="flex bg-slate-100 p-1 rounded-lg">
-                        <button @click="mode = 'visual'" :class="{'bg-white shadow text-slate-900': mode === 'visual', 'text-slate-500': mode !== 'visual'}" class="px-3 py-1 text-xs font-bold rounded-md transition">Visual</button>
-                        <button @click="mode = 'json'" :class="{'bg-white shadow text-blue-600': mode === 'json', 'text-slate-500': mode !== 'json'}" class="px-3 py-1 text-xs font-bold rounded-md transition">JSON</button>
+                        <button @click="mode = 'visual'"
+                            :class="{'bg-white shadow text-slate-900': mode === 'visual', 'text-slate-500': mode !== 'visual'}"
+                            class="px-3 py-1 text-xs font-bold rounded-md transition">
+                            Visual
+                        </button>
+                        <button @click="mode = 'json'"
+                            :class="{'bg-white shadow text-blue-600': mode === 'json', 'text-slate-500': mode !== 'json'}"
+                            class="px-3 py-1 text-xs font-bold rounded-md transition">
+                            JSON
+                        </button>
                     </div>
                 </div>
-                
+
                 <form method="POST" action="{{ url_for('main.add_schema', project_id=project.id) }}">
                     <!-- Hidden Input for Mode -->
-                    <input type="hidden" name="mode" :value="mode">
+                    <input type="hidden" name="mode" :value="mode" />
 
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Schema Name</label>
-                        <input type="text" name="name" placeholder="e.g. Invoice v2" required 
-                               class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm font-medium">
+                        <input type="text" name="name" placeholder="e.g. Invoice v2" required
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm font-medium" />
                     </div>
-                    
+
                     <!-- MODE: VISUAL -->
                     <div x-show="mode === 'visual'">
                         <div class="flex justify-between items-end mb-2">
                             <label class="block text-xs font-bold text-slate-500 uppercase">Data Fields</label>
-                            <button type="button" onclick="addField()" class="text-xs text-blue-600 font-bold flex items-center gap-1 hover:text-blue-800 transition">+ Add</button>
+                            <button type="button" onclick="addField()"
+                                class="text-xs text-blue-600 font-bold flex items-center gap-1 hover:text-blue-800 transition">
+                                + Add
+                            </button>
                         </div>
                         <div id="fields-container" class="space-y-2 mb-6 max-h-48 overflow-y-auto pr-1 no-scrollbar">
                             <!-- Default Field -->
                             <div class="grid grid-cols-12 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                                <div class="col-span-4"><input type="text" name="keys[]" placeholder="Key" class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white"></div>
                                 <div class="col-span-4">
-                                    <select name="types[]" class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white">
+                                    <input type="text" name="keys[]" placeholder="Key"
+                                        class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white" />
+                                </div>
+                                <div class="col-span-4">
+                                    <select name="types[]"
+                                        class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white">
                                         <option value="string">Text</option>
                                         <option value="number">Number</option>
                                         <option value="date">Date</option>
                                         <option value="boolean">Checkbox</option>
                                     </select>
                                 </div>
-                                <div class="col-span-4"><input type="text" name="descs[]" placeholder="Desc" class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white"></div>
+                                <div class="col-span-4">
+                                    <input type="text" name="descs[]" placeholder="Desc"
+                                        class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white" />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- MODE: RAW JSON -->
-                    <div x-show="mode === 'json'" style="display: none;">
+                    <div x-show="mode === 'json'" style="display: none">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Paste JSON Schema</label>
-                        <textarea name="json_content" rows="8" class="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50" 
-placeholder='{
+                        <textarea name="json_content" rows="8"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50"
+                            placeholder='{
   "type": "object",
   "properties": {
     "items": {
@@ -224,8 +286,9 @@ placeholder='{
   }
 }'></textarea>
                     </div>
-                    
-                    <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/10">
+
+                    <button type="submit"
+                        class="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/10">
                         Create Schema
                     </button>
                 </form>
@@ -237,66 +300,120 @@ placeholder='{
                 <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                         <h3 class="font-bold text-slate-900">Edit Schema JSON</h3>
-                        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">&times;</button>
+                        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
+                            &times;
+                        </button>
                     </div>
                     <form id="edit-form" method="POST" action="">
                         <div class="p-6">
-                            <textarea id="edit-textarea" name="json_content" rows="12" class="w-full px-3 py-3 rounded-lg border border-gray-200 font-mono text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50"></textarea>
+                            <textarea id="edit-textarea" name="json_content" rows="12"
+                                class="w-full px-3 py-3 rounded-lg border border-gray-200 font-mono text-xs text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50"></textarea>
                         </div>
                         <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-                            <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-slate-800">Cancel</button>
-                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200">Save Changes</button>
+                            <button type="button" onclick="closeEditModal()"
+                                class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-slate-800">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200">
+                                Save Changes
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
 
             <!-- Alpine.js for Tabs -->
-            <script src="//unpkg.com/alpinejs" defer></script> 
+            <script src="//unpkg.com/alpinejs" defer></script>
 
             <script>
                 // Visual Builder Logic
                 function addField() {
-                    const div = document.createElement('div');
-                    div.className = 'grid grid-cols-12 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 mt-2';
+                    const div = document.createElement("div");
+                    div.className =
+                        "grid grid-cols-12 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 mt-2";
                     div.innerHTML = `
                         <div class="col-span-4"><input type="text" name="keys[]" placeholder="Key" class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white"></div>
                         <div class="col-span-4"><select name="types[]" class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white"><option value="string">Text</option><option value="number">Number</option><option value="date">Date</option><option value="boolean">Checkbox</option></select></div>
                         <div class="col-span-4 flex gap-1"><input type="text" name="descs[]" placeholder="Desc" class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs bg-white"><button type="button" onclick="this.closest('.grid').remove()" class="text-gray-400 hover:text-red-500">&times;</button></div>
                     `;
-                    document.getElementById('fields-container').appendChild(div);
+                    document.getElementById("fields-container").appendChild(div);
                 }
 
                 // Modal Logic
                 function openEditModal(id, name) {
-                    const jsonContent = document.getElementById('schema-json-' + id).value;
-                    document.getElementById('edit-textarea').value = jsonContent;
-                    
+                    const jsonContent = document.getElementById(
+                        "schema-json-" + id,
+                    ).value;
+                    document.getElementById("edit-textarea").value = jsonContent;
+
                     // Set form action dynamically
-                    const form = document.getElementById('edit-form');
+                    const form = document.getElementById("edit-form");
                     form.action = `/project/{{ project.id }}/schema/${id}/update`;
-                    
-                    document.getElementById('edit-modal').classList.remove('hidden');
-                    document.getElementById('edit-modal').classList.add('flex');
+
+                    document.getElementById("edit-modal").classList.remove("hidden");
+                    document.getElementById("edit-modal").classList.add("flex");
                 }
 
                 function closeEditModal() {
-                    document.getElementById('edit-modal').classList.add('hidden');
-                    document.getElementById('edit-modal').classList.remove('flex');
+                    document.getElementById("edit-modal").classList.add("hidden");
+                    document.getElementById("edit-modal").classList.remove("flex");
                 }
             </script>
 
-            <!-- Webhook -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="font-bold text-slate-900 mb-1">Webhook Integration</h3>
-                <p class="text-xs text-slate-500 mb-4">Destination for JSON output.</p>
-                <form method="POST" action="{{ url_for('main.update_settings', project_id=project.id) }}">
-                    <input type="url" name="webhook_url" value="{{ project.webhook_url or '' }}" 
-                           placeholder="https://api.erp.com/webhook" 
-                           class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm mb-3">
-                    <button class="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition">Save Settings</button>
-                </form>
+            <!-- Workspace Administration (Webhooks & Billing) -->
+            {% if role_power[role] >= 3 %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+
+                <!-- Section 1: Webhook Integration -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-slate-900">Webhook Integration</h3>
+                        <span
+                            class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider rounded-full">Automate</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Target destination for extracted JSON data payloads.</p>
+
+                    <form method="POST" action="{{ url_for('main.update_settings', project_id=project.id) }}">
+                        <div class="relative mb-3">
+                            <input type="url" name="webhook_url" value="{{ project.webhook_url or '' }}"
+                                placeholder="https://api.erp.com/webhook"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm bg-slate-50/50 focus:bg-white" />
+                        </div>
+                        <button
+                            class="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition shadow-sm">
+                            Save Webhook URL
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Section 2: Billing Management (Owner Only) -->
+                {% if role == 'owner' and project.stripe_customer_id %}
+                <div class="pt-6 border-t border-gray-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-slate-900">Billing & Plan</h3>
+                        <span
+                            class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider rounded-full">Stripe
+                            Secure</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Manage your subscription, update cards, and download
+                        invoices.</p>
+
+                    <a href="{{ url_for('main.manage_billing', project_id=project.id) }}"
+                        class="flex items-center justify-center w-full bg-white border border-slate-200 text-slate-700 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 hover:border-slate-300 transition shadow-sm group">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 mr-2 text-slate-400 group-hover:text-indigo-500 transition" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        Manage Subscription
+                    </a>
+                </div>
+                {% endif %}
+
             </div>
+            {% endif %}
 
             <!-- Team -->
             <!-- Team & Invites -->
@@ -306,18 +423,26 @@ placeholder='{
                     {% for mem in members %}
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-xs border border-white shadow-sm">
+                            <div
+                                class="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 text-xs border border-white shadow-sm">
                                 {{ mem.user.username[0] | upper }}
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-slate-700">{{ mem.user.username }}</p>
-                                <p class="text-[10px] text-slate-400 uppercase tracking-wide font-bold">{{ mem.role }}</p>
+                                <p class="text-sm font-semibold text-slate-700">
+                                    {{ mem.user.username }}
+                                </p>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wide font-bold">
+                                    {{ mem.role }}
+                                </p>
                             </div>
                         </div>
                         {% if role_power[role] >= 3 and mem.user.id != current_user.id %}
-                        <a href="{{ url_for('main.remove_member', project_id=project.id, user_id=mem.user.id) }}" 
-                           class="text-slate-300 hover:text-red-500 transition">
-                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <a href="{{ url_for('main.remove_member', project_id=project.id, user_id=mem.user.id) }}"
+                            class="text-slate-300 hover:text-red-500 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
                         </a>
                         {% endif %}
                     </li>
@@ -325,53 +450,78 @@ placeholder='{
                 </ul>
 
                 {% if role_power[role] >= 3 %}
-                
+
                 <!-- Invite Links Section -->
                 <div class="border-t border-gray-100 pt-6 mt-6">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Active Invite Codes</h4>
-                    
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                        Active Invite Codes
+                    </h4>
+
                     {% if project.invites %}
-                        <div class="space-y-3 mb-4">
-                            {% for invite in project.invites %}
-                            <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-gray-200">
-                                <div class="flex flex-col">
-                                    <code class="text-xs font-mono font-bold text-slate-700 select-all">{{ invite.token }}</code>
-                                    <span class="text-[10px] text-slate-400 uppercase font-bold">Role: {{ invite.role }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="navigator.clipboard.writeText('{{ invite.token }}')" class="text-blue-500 hover:text-blue-700 text-xs font-bold" title="Copy Code">Copy</button>
-                                    <a href="{{ url_for('main.revoke_invite', project_id=project.id, invite_id=invite.id) }}" class="text-red-400 hover:text-red-600" title="Revoke">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    </a>
-                                </div>
+                    <div class="space-y-3 mb-4">
+                        {% for invite in project.invites %}
+                        <div
+                            class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-gray-200">
+                            <div class="flex flex-col">
+                                <code
+                                    class="text-xs font-mono font-bold text-slate-700 select-all">{{ invite.token }}</code>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold">Role: {{ invite.role
+                                    }}</span>
                             </div>
-                            {% endfor %}
+                            <div class="flex items-center gap-2">
+                                <button onclick="navigator.clipboard.writeText('{{ invite.token }}')"
+                                    class="text-blue-500 hover:text-blue-700 text-xs font-bold" title="Copy Code">
+                                    Copy
+                                </button>
+                                <a href="{{ url_for('main.revoke_invite', project_id=project.id, invite_id=invite.id) }}"
+                                    class="text-red-400 hover:text-red-600" title="Revoke">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
 
                     <!-- Generate New Code -->
-                    <form method="POST" action="{{ url_for('main.create_invite', project_id=project.id) }}" class="flex gap-2">
-                        <select name="role" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none">
+                    <form method="POST" action="{{ url_for('main.create_invite', project_id=project.id) }}"
+                        class="flex gap-2">
+                        <select name="role"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none">
                             <option value="watcher">Watcher Link</option>
                             <option value="verifier">Verifier Link</option>
                             <option value="admin">Admin Link</option>
                         </select>
-                        <button class="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition whitespace-nowrap">Create Code</button>
+                        <button
+                            class="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition whitespace-nowrap">
+                            Create Code
+                        </button>
                     </form>
                 </div>
 
                 <!-- Direct Email Invite -->
                 <div class="border-t border-gray-100 pt-6 mt-6">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Invite via Email</h4>
-                    <form method="POST" action="{{ url_for('main.add_member', project_id=project.id) }}" class="flex flex-col gap-2">
-                        <input type="email" name="email" placeholder="colleague@example.com" required class="px-3 py-2 rounded-lg border border-gray-200 text-xs focus:ring-1 focus:ring-green-500 outline-none">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                        Invite via Email
+                    </h4>
+                    <form method="POST" action="{{ url_for('main.add_member', project_id=project.id) }}"
+                        class="flex flex-col gap-2">
+                        <input type="email" name="email" placeholder="colleague@example.com" required
+                            class="px-3 py-2 rounded-lg border border-gray-200 text-xs focus:ring-1 focus:ring-green-500 outline-none" />
                         <div class="flex gap-2">
-                            <select name="role" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs bg-white focus:ring-1 focus:ring-green-500 outline-none">
+                            <select name="role"
+                                class="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs bg-white focus:ring-1 focus:ring-green-500 outline-none">
                                 <option value="watcher">Watcher</option>
                                 <option value="verifier">Verifier</option>
                                 <option value="admin">Admin</option>
                             </select>
-                            <button class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-green-700 transition">Send</button>
+                            <button
+                                class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-green-700 transition">
+                                Send
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -380,25 +530,36 @@ placeholder='{
             <!-- DANGER ZONE -->
             <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-6">
                 <h3 class="font-bold text-red-600 mb-2">Danger Zone</h3>
-                
+
                 {% if role == 'owner' %}
-                    <p class="text-xs text-slate-500 mb-4">
-                        Permanently delete this workspace and cancel the <strong>$20/mo subscription</strong> immediately. This cannot be undone.
-                    </p>
-                    <form action="{{ url_for('main.delete_project', project_id=project.id) }}" method="POST" onsubmit="return confirm('CRITICAL WARNING:\n\n1. Your subscription will be cancelled immediately.\n2. All documents and data will be permanently deleted.\n\nAre you absolutely sure?');">
-                        <button type="submit" class="w-full bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-lg text-sm font-bold hover:bg-red-600 hover:text-white transition">
-                            Delete Workspace
-                        </button>
-                    </form>
+                <p class="text-xs text-slate-500 mb-4">
+                    Permanently delete this workspace and cancel the
+                    <strong>$20/mo subscription</strong> immediately. This cannot be
+                    undone.
+                </p>
+                <form action="{{ url_for('main.delete_project', project_id=project.id) }}" method="POST" onsubmit="
+            return confirm(
+              'CRITICAL WARNING:\n\n1. Your subscription will be cancelled immediately.\n2. All documents and data will be permanently deleted.\n\nAre you absolutely sure?',
+            );
+          ">
+                    <button type="submit"
+                        class="w-full bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-lg text-sm font-bold hover:bg-red-600 hover:text-white transition">
+                        Delete Workspace
+                    </button>
+                </form>
                 {% else %}
-                    <p class="text-xs text-slate-500 mb-4">
-                        Remove yourself from this workspace. You will lose access to all documents.
-                    </p>
-                    <form action="{{ url_for('main.leave_project', project_id=project.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to leave this team?');">
-                        <button type="submit" class="w-full bg-white text-slate-600 border border-gray-200 py-2.5 rounded-lg text-sm font-bold hover:bg-slate-50 hover:text-slate-800 transition">
-                            Leave Workspace
-                        </button>
-                    </form>
+                <p class="text-xs text-slate-500 mb-4">
+                    Remove yourself from this workspace. You will lose access to all
+                    documents.
+                </p>
+                <form action="{{ url_for('main.leave_project', project_id=project.id) }}" method="POST" onsubmit="
+            return confirm('Are you sure you want to leave this team?');
+          ">
+                    <button type="submit"
+                        class="w-full bg-white text-slate-600 border border-gray-200 py-2.5 rounded-lg text-sm font-bold hover:bg-slate-50 hover:text-slate-800 transition">
+                        Leave Workspace
+                    </button>
+                </form>
                 {% endif %}
             </div>
         </div>
@@ -406,11 +567,12 @@ placeholder='{
 </div>
 
 <script>
-function addField() {
-    const container = document.getElementById('fields-container');
-    const div = document.createElement('div');
-    div.className = 'grid grid-cols-12 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 group animate-fade-in-down';
-    div.innerHTML = `
+    function addField() {
+        const container = document.getElementById("fields-container");
+        const div = document.createElement("div");
+        div.className =
+            "grid grid-cols-12 gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 group animate-fade-in-down";
+        div.innerHTML = `
         <div class="col-span-4">
             <input type="text" name="keys[]" placeholder="Key" required class="w-full px-2 py-1.5 rounded border border-gray-200 text-xs font-mono focus:border-blue-500 outline-none bg-white">
         </div>
@@ -429,7 +591,7 @@ function addField() {
             </button>
         </div>
     `;
-    container.appendChild(div);
-}
+        container.appendChild(div);
+    }
 </script>
 {% endblock %}

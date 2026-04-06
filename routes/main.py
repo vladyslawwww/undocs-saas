@@ -644,3 +644,38 @@ def delete_document(doc_id):
         flash(f"Error deleting document: {str(e)}", "danger")
 
     return redirect(url_for("main.project_view", project_id=project_id))
+
+
+@main_bp.route("/project/<int:project_id>/billing")
+@login_required
+def manage_billing(project_id):
+    # 1. Verify Ownership
+    membership = ProjectMembership.query.filter_by(
+        user_id=current_user.id, project_id=project_id, role="owner"
+    ).first()
+
+    if not membership:
+        flash(
+            "You do not have permission to manage billing for this workspace.", "danger"
+        )
+        return redirect(url_for("main.dashboard"))
+
+    project = membership.project
+
+    # 2. Ensure they have a customer ID to manage
+    if not project.stripe_customer_id:
+        flash("Billing information not found for this workspace.", "warning")
+        return redirect(url_for("main.project_view", project_id=project_id))
+
+    # 3. Create a Stripe Billing Portal session
+    try:
+        portal_session = stripe.billing_portal.Session.create(
+            customer=project.stripe_customer_id,
+            return_url=url_for(
+                "main.project_view", project_id=project_id, _external=True
+            ),
+        )
+        return redirect(portal_session.url, code=303)
+    except Exception as e:
+        flash(f"Could not connect to billing portal: {str(e)}", "danger")
+        return redirect(url_for("main.project_view", project_id=project_id))
