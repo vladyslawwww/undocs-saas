@@ -243,18 +243,13 @@ def retry_payment(project_id):
 
     # 3. Create NEW Stripe Session for Project
     try:
+        price_id = os.getenv("STRIPE_PRO_PRICE_ID")
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
                 {
-                    "price_data": {
-                        "currency": "usd",
-                        "product_data": {
-                            "name": f"Workspace: {project.name}",
-                        },
-                        "unit_amount": 2000,
-                        "recurring": {"interval": "month"},
-                    },
+                    "price": price_id,
                     "quantity": 1,
                 }
             ],
