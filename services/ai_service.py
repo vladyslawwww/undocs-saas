@@ -6,7 +6,15 @@ from google.genai import types
 from models import DocSchema, Document, Project, db
 from services.storage_service import get_file_bytes_from_r2
 
-client = genai.Client()
+client = None
+
+
+def get_gemini_client():
+    """Lazily initializes and returns the Gemini client, creating it only once."""
+    global client
+    if client is None:
+        client = genai.Client()
+    return client
 
 
 def process_document_logic(app, doc_id):
@@ -20,10 +28,13 @@ def process_document_logic(app, doc_id):
         db.session.commit()
 
         try:
-            # 1. Fetch File Bytes from R2
+            # 1. Fetch the client using helper function
+            gemini = get_gemini_client()
+
+            # 2. Fetch File Bytes from R2
             file_bytes = get_file_bytes_from_r2(doc.storage_filename)
 
-            # 2. Infer Mime Type
+            # 3. Infer Mime Type
             mime_type = "application/pdf"
             if doc.filename.lower().endswith((".png", ".jpg", ".jpeg")):
                 mime_type = "image/jpeg"
@@ -50,7 +61,7 @@ def process_document_logic(app, doc_id):
                 response_mime_type="application/json", temperature=0.0
             )
 
-            response = client.models.generate_content(
+            response = gemini.models.generate_content(
                 model="gemini-2.5-flash", contents=[file_part, prompt], config=config
             )
 
