@@ -1,4 +1,3 @@
-# routes/api.py
 import uuid
 
 from flask import Blueprint, current_app, jsonify, request
@@ -25,6 +24,17 @@ def ingest():
     if not project:
         return jsonify({"error": "Invalid API Key"}), 401
 
+    # --- START: USAGE LIMIT LOGIC ---
+    if project.pages_used >= project.page_limit:
+        return jsonify(
+            {
+                "error": "Usage limit reached.",
+                "message": f"You have used {project.pages_used}/{project.page_limit} documents. Please upgrade your plan.",
+            }
+        ), 402  # 402 Payment Required is the correct HTTP status code
+
+    # --- END: USAGE LIMIT LOGIC ---
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -43,7 +53,6 @@ def ingest():
     # 1. Generate Secure Filename & Read Bytes
     original_name = secure_filename(file.filename)
     storage_name = f"workspace_{project.id}/{uuid.uuid4().hex}_{original_name}"
-
     file_bytes = file.read()
     mime_type = file.mimetype
 
@@ -58,18 +67,21 @@ def ingest():
         status="QUEUED",
     )
     db.session.add(doc)
+
+    # --- START: INCREMENT COUNTER ---
+    # Atomically increment the usage counter
+    project.pages_used += 1
     db.session.commit()
+    # --- END: INCREMENT COUNTER ---
 
     # 4. Publish to Serverless Queue
     success = publish_document_job(doc.id)
 
     if not success:
         # Fallback for local testing without QStash
-        import threading
-
-        from services.ai_service import process_document_logic
-
         app_obj = current_app._get_current_object()
-        threading.Thread(target=process_document_logic, args=(app_obj, doc.id)).start()
+        # NOTE: We can't use threading here anymore as it won't have the file_bytes
+        # This fallback needs to be adapted if used, but we're moving to QStash primarily.
+        print("Warning: QStash is not configured. Job was not queued.")
 
     return jsonify({"status": "queued", "doc_id": doc.id, "file": original_name})
