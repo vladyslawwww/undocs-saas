@@ -128,41 +128,38 @@ def onboarding_choice():
 @auth_bp.route("/create-workspace", methods=["GET", "POST"])
 @login_required
 def create_workspace():
-    if request.method == "POST":
-        # 1. Check if user has EVER used a trial
-        if current_user.has_used_trial:
-            flash(
-                "You have already used your free trial. Please upgrade an existing workspace or create a Pro workspace.",
-                "warning",
-            )
-            return redirect(url_for("main.dashboard"))
+    # 1. SECURITY/UX: Prevent even seeing the form if trial is used
+    if current_user.has_used_trial:
+        flash(
+            "You have already used your free trial workspace. Please upgrade to Pro.",
+            "warning",
+        )
+        return redirect(url_for("main.dashboard"))
 
+    if request.method == "POST":
         project_name = request.form.get("project_name")
 
-        # 2. Create the Trial Project
+        # 2. CREATE TRIAL PROJECT
         new_project = Project(
-            name=project_name,
-            subscription_status="trial",
-            page_limit=10,
-            pages_used=0,
+            name=project_name, subscription_status="trial", page_limit=10
         )
         db.session.add(new_project)
 
-        # 3. Mark the USER as having consumed their trial
+        # 3. CONSUME TRIAL FLAG
         current_user.has_used_trial = True
 
-        # 4. Create Membership
+        # 4. ADD MEMBERSHIP
         mem = ProjectMembership(
             user_id=current_user.id, project_id=new_project.id, role="owner"
         )
         db.session.add(mem)
         db.session.commit()
 
-        flash(
-            f"Workspace '{project_name}' created! You have 10 free trial extractions.",
-            "success",
-        )
+        flash(f"Workspace '{project_name}' created successfully!", "success")
         return redirect(url_for("main.project_view", project_id=new_project.id))
+
+    # 5. This handles the GET request
+    return render_template("setup_project.html")
 
 
 @auth_bp.route("/workspace/success")
