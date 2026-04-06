@@ -111,12 +111,19 @@ def dashboard():
         )
         total_docs += doc_count
         pending_reviews += review_count
+
+        # Calculate usage percentage for the UI
+        # Safety check to avoid division by zero
+        limit = proj.page_limit if proj.page_limit > 0 else 1
+        usage_percent = min(int((proj.pages_used / limit) * 100), 100)
+
         projects_data.append(
             {
                 "project": proj,
                 "role": mem.role,
                 "doc_count": doc_count,
                 "review_count": review_count,
+                "usage_percent": usage_percent,
             }
         )
 
