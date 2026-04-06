@@ -8,6 +8,7 @@ from flask import (
     abort,
     current_app,  # noqa: F401
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -686,3 +687,37 @@ def manage_billing(project_id):
     except Exception as e:
         flash(f"Could not connect to billing portal: {str(e)}", "danger")
         return redirect(url_for("main.project_view", project_id=project_id))
+
+
+@main_bp.route("/project/<int:project_id>/reveal-key")
+@login_required
+def reveal_api_key(project_id):
+    # Only Owner can reveal
+    membership = ProjectMembership.query.filter_by(
+        user_id=current_user.id, project_id=project_id
+    ).first()
+    if not membership or membership.role != "owner":
+        return jsonify({"error": "Unauthorized"}), 403
+
+    project = membership.project
+    return jsonify({"api_key": project.get_decrypted_key()})
+
+
+@main_bp.route("/project/<int:project_id>/rotate-key", methods=["POST"])
+@login_required
+def rotate_api_key(project_id):
+    role = get_role(project_id)
+    if ROLE_POWER.get(role, 0) < 3:
+        abort(403)
+
+    project = db.session.get(Project, project_id)
+
+    # Generate: und_ID_RandomSecret
+    secret = secrets.token_urlsafe(24)
+    new_key = f"und_{project.id}_{secret}"
+
+    project.set_api_key(new_key)  # This now sets both hash and encrypted
+    db.session.commit()
+
+    flash("API Key regenerated successfully.", "success")
+    return redirect(url_for("main.project_view", project_id=project_id))

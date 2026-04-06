@@ -32,11 +32,20 @@ def get_page_count(file_bytes, mime_type):
 
 @api_bp.route("/ingest", methods=["POST"])
 def ingest():
-    api_key = request.headers.get("X-API-Key")
-    project = Project.query.filter_by(api_key=api_key).first()
+    raw_key = request.headers.get("X-API-Key")
+    if not raw_key or not raw_key.startswith("und_"):
+        return jsonify({"error": "Invalid API Key format"}), 401
 
-    if not project:
-        return jsonify({"error": "Invalid API Key"}), 401
+    try:
+        # Format: und_PROJECTID_SECRET
+        parts = raw_key.split("_")
+        project_id = int(parts[1])
+        project = db.session.get(Project, project_id)
+
+        if not project or not project.check_api_key(raw_key):
+            return jsonify({"error": "Invalid API Key"}), 401
+    except (ValueError, IndexError):
+        return jsonify({"error": "Malformed API Key"}), 401
 
     # --- START: USAGE LIMIT LOGIC ---
     if project.pages_used >= project.page_limit:

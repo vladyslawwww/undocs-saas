@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 
 from flask_login import UserMixin
@@ -52,7 +51,7 @@ class ProjectInvite(db.Model):
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
-    api_key = db.Column(db.String(64), unique=True, default=lambda: str(uuid.uuid4()))
+    api_key_hash = db.Column(db.String(256), unique=True, nullable=True)
     webhook_url = db.Column(db.String(300), nullable=True)
     subscription_status = db.Column(db.String(20), default="inactive")
     stripe_subscription_id = db.Column(db.String(100), nullable=True)
@@ -65,6 +64,12 @@ class Project(db.Model):
     invites = db.relationship(
         "ProjectInvite", backref="project", lazy=True, cascade="all, delete-orphan"
     )
+
+    def set_api_key(self, raw_key):
+        self.api_key_hash = generate_password_hash(raw_key)
+
+    def check_api_key(self, raw_key):
+        return check_password_hash(self.api_key_hash, raw_key)
 
 
 class DocSchema(db.Model):
