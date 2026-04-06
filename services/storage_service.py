@@ -36,3 +36,11 @@ def get_file_url(filename):
     return s3.generate_presigned_url(
         "get_object", Params={"Bucket": bucket, "Key": filename}, ExpiresIn=3600
     )
+
+
+def get_file_bytes_from_r2(filename):
+    """Downloads file bytes directly into memory for AI processing"""
+    s3 = get_s3_client()
+    bucket = os.getenv("R2_BUCKET_NAME", "undocs-storage")
+    response = s3.get_object(Bucket=bucket, Key=filename)
+    return response["Body"].read()

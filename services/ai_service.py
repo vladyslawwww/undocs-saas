@@ -1,16 +1,16 @@
-# services/ai_service.py
 import json
 
 from google import genai
 from google.genai import types
 
 from models import DocSchema, Document, Project, db
+from services.storage_service import get_file_bytes_from_r2
 
-# The Client automatically picks up the GEMINI_API_KEY from your .env file
 client = genai.Client()
 
 
-def process_document_logic(app, doc_id, file_bytes, mime_type):
+def process_document_logic(app, doc_id):
+    """Now only takes doc_id. Fetches bytes from R2 safely in the background."""
     with app.app_context():
         doc = db.session.get(Document, doc_id)
         if not doc:
@@ -20,6 +20,14 @@ def process_document_logic(app, doc_id, file_bytes, mime_type):
         db.session.commit()
 
         try:
+            # 1. Fetch File Bytes from R2
+            file_bytes = get_file_bytes_from_r2(doc.storage_filename)
+
+            # 2. Infer Mime Type
+            mime_type = "application/pdf"
+            if doc.filename.lower().endswith((".png", ".jpg", ".jpeg")):
+                mime_type = "image/jpeg"
+
             schema = db.session.get(DocSchema, doc.schema_id)
             schema_json_str = json.dumps(schema.structure, indent=2)
 
@@ -37,22 +45,16 @@ def process_document_logic(app, doc_id, file_bytes, mime_type):
             4. Return ONLY valid JSON without markdown wrapping.
             """
 
-            # 1. Create a Part object using the file bytes directly
             file_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
-
-            # 2. Configure the generation (strict JSON output)
             config = types.GenerateContentConfig(
                 response_mime_type="application/json", temperature=0.0
             )
 
-            # 3. Call the API using the new unified Client
             response = client.models.generate_content(
                 model="gemini-2.5-flash", contents=[file_part, prompt], config=config
             )
 
             result_json = response.text.strip()
-
-            # Clean up potential markdown formatting from Gemini
             if result_json.startswith("```"):
                 result_json = result_json.strip("```").removeprefix("json").strip()
 
@@ -60,7 +62,7 @@ def process_document_logic(app, doc_id, file_bytes, mime_type):
             doc.status = "REVIEW_NEEDED"
 
         except Exception as e:
-            print(f"Gemini API Error: {e}")
+            print(f"Gemini API / Worker Error: {e}")
             doc.status = "ERROR"
             doc.extracted_data = {"error": str(e)}
 

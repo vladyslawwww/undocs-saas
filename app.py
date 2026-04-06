@@ -10,6 +10,7 @@ from routes.api import api_bp
 from routes.auth import auth_bp
 from routes.main import main_bp
 from routes.webhooks import webhooks_bp
+from routes.internal import internal_bp
 
 # Reload of .env to be sure
 load_dotenv(override=True)
@@ -78,6 +79,7 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(webhooks_bp)
+    app.register_blueprint(internal_bp)
 
     @app.before_request
     def enforce_onboarding():

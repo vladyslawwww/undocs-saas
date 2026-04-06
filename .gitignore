@@ -21,6 +21,7 @@ instance/
 create_complete_context.py
 full_project_context.txt
 stripe.exe
+.vscode
 
 # Uploads / Local Storage
 static/uploads/*

@@ -1,12 +1,11 @@
 # routes/api.py
-import threading
 import uuid
 
 from flask import Blueprint, current_app, jsonify, request
 from werkzeug.utils import secure_filename
 
 from models import DocSchema, Document, Project, db
-from services.ai_service import process_document_logic
+from services.queue_service import publish_document_job
 from services.storage_service import upload_file_to_r2
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
@@ -61,11 +60,16 @@ def ingest():
     db.session.add(doc)
     db.session.commit()
 
-    # 4. Start processing
-    # Note: We are temporarily keeping threading. We will replace this with Upstash Qstash next!
-    app_obj = current_app._get_current_object()
-    threading.Thread(
-        target=process_document_logic, args=(app_obj, doc.id, file_bytes, mime_type)
-    ).start()
+    # 4. Publish to Serverless Queue
+    success = publish_document_job(doc.id)
+
+    if not success:
+        # Fallback for local testing without QStash
+        import threading
+
+        from services.ai_service import process_document_logic
+
+        app_obj = current_app._get_current_object()
+        threading.Thread(target=process_document_logic, args=(app_obj, doc.id)).start()
 
     return jsonify({"status": "queued", "doc_id": doc.id, "file": original_name})
