@@ -1,8 +1,5 @@
 import json
 
-from google import genai
-from google.genai import types
-
 from models import DocSchema, Document, Project, db
 from services.storage_service import get_file_bytes_from_r2
 
@@ -11,6 +8,8 @@ client = None
 
 def get_gemini_client():
     """Lazily initializes and returns the Gemini client, creating it only once."""
+    from google import genai
+
     global client
     if client is None:
         client = genai.Client()
@@ -20,6 +19,8 @@ def get_gemini_client():
 def process_document_logic(app, doc_id):
     """Now only takes doc_id. Fetches bytes from R2 safely in the background."""
     with app.app_context():
+        from google.genai import types
+
         doc = db.session.get(Document, doc_id)
         if not doc:
             return

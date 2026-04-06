@@ -1,8 +1,6 @@
 import os
-import secrets
 from datetime import datetime, timedelta
 
-import stripe
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
@@ -10,10 +8,11 @@ from models import Project, ProjectInvite, ProjectMembership, User, db
 from services.email_service import send_confirmation_email
 
 auth_bp = Blueprint("auth", __name__)
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
 def generate_otp():
+    import secrets
+
     return str(secrets.randbelow(1000000)).zfill(6)
 
 
@@ -225,6 +224,10 @@ def join_workspace():
 @auth_bp.route("/project/<int:project_id>/pay")
 @login_required
 def retry_payment(project_id):
+    import stripe
+
+    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
     # 1. Find Project & Verify Ownership
     membership = ProjectMembership.query.filter_by(
         user_id=current_user.id, project_id=project_id, role="owner"
