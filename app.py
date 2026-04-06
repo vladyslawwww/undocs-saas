@@ -1,5 +1,6 @@
 import os
 
+import click
 from dotenv import load_dotenv
 from flask import Flask, redirect, request, send_from_directory, url_for
 from flask_login import LoginManager, current_user
@@ -93,6 +94,38 @@ def create_app():
     # Start the keep-alive thread ONLY in production
     if os.getenv("ENV") == "production" or not app.debug:
         start_keep_alive()
+
+    # --- ADMIN CLI COMMANDS ---
+
+    @app.cli.group()
+    def admin():
+        """Administrative commands for Undocs.ai"""
+        pass
+
+    @admin.command("grant-pro")
+    @click.argument("project_id")
+    @click.option("--pages", default=1000, help="Number of pages to grant")
+    def grant_pro(project_id, pages):
+        """Force-activate a workspace to PRO status without payment"""
+        from models import Project, db
+
+        project = db.session.get(Project, int(project_id))
+
+        if not project:
+            print(f"❌ Project {project_id} not found.")
+            return
+
+        project.subscription_status = "active"
+        project.page_limit = pages
+        # We don't touch stripe_subscription_id so it remains 'None'
+        # which signals it's a manually managed/gifted account.
+
+        db.session.commit()
+        print(
+            f"✅ Project '{project.name}' (ID: {project.id}) is now PRO with {pages} pages."
+        )
+
+    # --------------------------
 
     # with app.app_context():
     #     db.create_all()
