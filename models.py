@@ -1,11 +1,30 @@
+import base64
+import os
 from datetime import datetime
 
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.sqlite import JSON
 from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
+
+
+def get_cipher():
+    """Derives a deterministic encryption key from the SECRET_KEY"""
+    password = os.getenv("SECRET_KEY", "dev-secret-key").encode()
+    salt = b"undocs_salt_fixed"  # Use a fixed salt
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(password))
+    return Fernet(key)
 
 
 class ProjectMembership(db.Model):
@@ -53,6 +72,7 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     api_key_hash = db.Column(db.String(256), unique=True, nullable=True)
+    api_key_encrypted = db.Column(db.Text, nullable=True)
     webhook_url = db.Column(db.String(300), nullable=True)
     subscription_status = db.Column(db.String(20), default="inactive")
     stripe_subscription_id = db.Column(db.String(100), nullable=True)
@@ -67,9 +87,26 @@ class Project(db.Model):
     )
 
     def set_api_key(self, raw_key):
+        """Hashes for API lookup AND encrypts for UI reveal"""
         self.api_key_hash = generate_password_hash(raw_key)
+        cipher = get_cipher()
+        self.api_key_encrypted = cipher.encrypt(raw_key.encode()).decode()
+
+    def get_decrypted_key(self):
+        """Decrypts the key for the Owner UI"""
+        if not self.api_key_encrypted:
+            return "No key generated. Please rotate key."
+        try:
+            cipher = get_cipher()
+            return cipher.decrypt(self.api_key_encrypted.encode()).decode()
+        except Exception as e:
+            print(f"Decryption Error: {e}")
+            return "Decryption Failed"
 
     def check_api_key(self, raw_key):
+        """Verifies a raw key against the stored hash"""
+        if not self.api_key_hash:
+            return False
         return check_password_hash(self.api_key_hash, raw_key)
 
 
