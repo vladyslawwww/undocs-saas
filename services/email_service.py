@@ -1,60 +1,44 @@
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import os
+import threading
 
-from flask import current_app
+import resend
+
+# Initialize Resend with your API Key
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 
 def send_confirmation_email(user_email, code):
     """
-    Sends a 6-digit OTP code to the user
+    Sends a 6-digit OTP code to the user via Resend API in a background thread
+    to prevent blocking the main process and saving memory.
     """
-    # --- FAILSAFE PRINT ---
-    print("\n" + "=" * 60)
-    print(f" 🔐 OTP CODE: {code}")
-    print("=" * 60 + "\n")
-    # ----------------------
+    # 1. ALWAYS print to console first (fail-safe for testing)
+    print(f"\n[INTERNAL] 🔐 OTP CODE FOR {user_email}: {code}\n")
 
-    # 2. Get Config
-    smtp_server = current_app.config.get("MAIL_SERVER")
-    smtp_port = current_app.config.get("MAIL_PORT")
-    smtp_user = current_app.config.get("MAIL_USERNAME")
-    smtp_password = current_app.config.get("MAIL_PASSWORD")
-    smtp_sender = current_app.config.get("MAIL_DEFAULT_SENDER")
-
-    if not smtp_user or not smtp_password:
+    if not resend.api_key:
+        print("⚠️ RESEND_API_KEY missing. Email not sent via API.")
         return False
 
-    # 3. Construct Email
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"Your Verification Code: {code}"
-    msg["From"] = smtp_sender
-    msg["To"] = user_email
+    def _send_action():
+        try:
+            params = {
+                "from": os.getenv("MAIL_DEFAULT_SENDER", "onboarding@resend.dev"),
+                "to": [user_email],
+                "subject": f"Your Verification Code: {code}",
+                "html": f"""
+                <div style="font-family: sans-serif; text-align: center; padding: 40px; border: 1px solid #eee; border-radius: 10px;">
+                    <h2 style="color: #111;">Welcome to Undocs.ai</h2>
+                    <p style="color: #666;">Enter this code to verify your account:</p>
+                    <h1 style="background: #f4f4f4; padding: 20px; display: inline-block; letter-spacing: 10px; border-radius: 8px;">{code}</h1>
+                    <p style="color: #999; font-size: 12px; margin-top: 20px;">Expires in 15 minutes.</p>
+                </div>
+                """,
+            }
+            resend.Emails.send(params)
+            print(f"✅ Email sent successfully to {user_email}")
+        except Exception as e:
+            print(f"❌ Resend Error: {e}")
 
-    html_content = f"""
-    <html>
-      <body style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-        <h2>Welcome to Undocs.ai</h2>
-        <p>Please enter this code to verify your account:</p>
-        <h1 style="background: #f3f4f6; padding: 10px; display: inline-block; letter-spacing: 5px; color: #333; border: 1px dashed #ccc;">{code}</h1>
-        <p>This code expires in 15 minutes.</p>
-        <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email.</p>
-      </body>
-    </html>
-    """
-    msg.attach(MIMEText(html_content, "html"))
-
-    # 4. Send
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.ehlo()
-        if current_app.config.get("MAIL_USE_TLS"):
-            server.starttls()
-            server.ehlo()
-        server.login(smtp_user, smtp_password)
-        server.sendmail(smtp_sender, [user_email], msg.as_string())
-        server.quit()
-        return True
-    except Exception as e:
-        print(f" >> EMAIL FAILED: {e}")
-        return False
+    # 2. Run in a background thread so the Flask worker can return 'Redirect' immediately
+    threading.Thread(target=_send_action).start()
+    return True
