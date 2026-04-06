@@ -35,10 +35,11 @@ def stripe_webhook():
         if project_id:
             project = db.session.get(Project, int(project_id))
             if project:
-                print(f"💰 WEBHOOK: Activating Project {project.id}")
+                print(f"💰 WEBHOOK: Upgrading Project {project.id} to Pro")
                 project.subscription_status = "active"
                 project.stripe_subscription_id = stripe_sub_id
                 project.stripe_customer_id = stripe_customer_id
+                project.page_limit = 1000
                 db.session.commit()
 
     # 2. Payment Failed

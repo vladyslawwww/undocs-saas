@@ -132,11 +132,12 @@ def create_workspace():
     if request.method == "POST":
         project_name = request.form.get("project_name")
 
-        # 1. Create the Project Record (Inactive)
+        # 1. Create the Project in TRIAL mode
         new_project = Project(
             name=project_name,
-            subscription_status="pending_payment",
-            page_limit=1000,
+            subscription_status="trial",  # Changed from pending_payment
+            page_limit=10,  # Free tier limit
+            pages_used=0,
         )
         db.session.add(new_project)
         db.session.commit()
@@ -148,37 +149,11 @@ def create_workspace():
         db.session.add(mem)
         db.session.commit()
 
-        # 3. Create Stripe Session with Reference
-        try:
-            checkout_session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                line_items=[
-                    {
-                        "price_data": {
-                            "currency": "usd",
-                            "product_data": {
-                                "name": f"Workspace: {project_name}",
-                            },
-                            "unit_amount": 2000,
-                            "recurring": {"interval": "month"},
-                        },
-                        "quantity": 1,
-                    }
-                ],
-                mode="subscription",
-                # Pass the Project ID so the Webhook knows what to activate
-                client_reference_id=str(new_project.id),
-                success_url=os.getenv("BASE_URL") + "/workspace/success",
-                cancel_url=os.getenv("BASE_URL") + "/create-workspace",
-            )
-            return redirect(checkout_session.url, code=303)
-        except Exception as e:
-            # Rollback if Stripe fails
-            db.session.delete(mem)
-            db.session.delete(new_project)
-            db.session.commit()
-            flash(f"Stripe Error: {str(e)}", "danger")
-            return redirect(url_for("auth.create_workspace"))
+        flash(
+            f"Workspace '{project_name}' created! You have 10 free trial extractions.",
+            "success",
+        )
+        return redirect(url_for("main.project_view", project_id=new_project.id))
 
     return render_template("setup_project.html")
 

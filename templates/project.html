@@ -156,6 +156,15 @@
                         Nearly out of credits. Auto-extraction will pause soon.
                     </p>
                     {% endif %}
+                    {% if project.subscription_status == 'trial' %}
+    <div class="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
+        <p class="text-[11px] text-indigo-700 font-semibold mb-2">🚀 You're on the Free Trial</p>
+        <a href="{{ url_for('auth.retry_payment', project_id=project.id) }}" 
+           class="block w-full text-center bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm">
+            Upgrade to Pro (1,000 pages/mo)
+        </a>
+    </div>
+    {% endif %}
                 </div>
             </div>
             <!-- END QUOTA CARD -->
