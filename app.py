@@ -117,8 +117,8 @@ def create_app():
             mimetype="image/svg+xml",
         )
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     return app
 
