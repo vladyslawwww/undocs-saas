@@ -1,6 +1,7 @@
 import os
 
 import click
+import stripe
 from dotenv import load_dotenv
 from flask import Flask, redirect, request, send_from_directory, url_for
 from flask_login import LoginManager, current_user
@@ -41,6 +42,14 @@ def create_app():
     app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
         "MAIL_DEFAULT_SENDER", "onboarding@resend.dev"
     )
+
+    # GLOBAL STRIPE CONFIGURATION
+    # This ensures EVERY blueprint has the key ready
+    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+    # Safety log (will show in Render logs)
+    if not stripe.api_key:
+        print("⚠️ WARNING: STRIPE_SECRET_KEY is not set in environment variables!")
 
     db.init_app(app)
     migrate = Migrate(app, db)

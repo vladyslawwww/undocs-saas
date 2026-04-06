@@ -245,8 +245,6 @@ def join_workspace():
 def retry_payment(project_id):
     import stripe
 
-    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-
     # 1. Find Project & Verify Ownership
     membership = ProjectMembership.query.filter_by(
         user_id=current_user.id, project_id=project_id, role="owner"
