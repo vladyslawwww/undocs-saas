@@ -7,6 +7,9 @@ from flask import Flask, redirect, request, send_from_directory, url_for
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 
+# Reload of .env to be sure
+load_dotenv(override=True)
+
 from models import User, db
 from routes.api import api_bp
 from routes.auth import auth_bp
@@ -14,9 +17,6 @@ from routes.internal import internal_bp
 from routes.main import main_bp
 from routes.webhooks import webhooks_bp
 from services.keep_alive import start_keep_alive
-
-# Reload of .env to be sure
-load_dotenv(override=True)
 
 
 def safe_int(value, default):
