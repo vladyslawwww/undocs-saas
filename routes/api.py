@@ -1,6 +1,5 @@
 import uuid
 
-import fitz
 from flask import Blueprint, current_app, jsonify, request
 from werkzeug.utils import secure_filename
 
@@ -20,6 +19,8 @@ def allowed_file(filename):
 def get_page_count(file_bytes, mime_type):
     """Returns the number of pages in a PDF or 1 for images."""
     if "pdf" in mime_type:
+        import fitz
+
         try:
             with fitz.open(stream=file_bytes, filetype="pdf") as doc:
                 return doc.page_count
