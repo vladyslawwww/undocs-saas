@@ -56,6 +56,7 @@ class Project(db.Model):
     webhook_url = db.Column(db.String(300), nullable=True)
     subscription_status = db.Column(db.String(20), default="inactive")
     stripe_subscription_id = db.Column(db.String(100), nullable=True)
+    stripe_customer_id = db.Column(db.String(100), nullable=True)
     page_limit = db.Column(db.Integer, default=1000)
     pages_used = db.Column(db.Integer, default=0)
 

@@ -4,13 +4,14 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, request, send_from_directory, url_for
 from flask_login import LoginManager, current_user
 from flask_mail import Mail
+from flask_migrate import Migrate
 
 from models import User, db
 from routes.api import api_bp
 from routes.auth import auth_bp
+from routes.internal import internal_bp
 from routes.main import main_bp
 from routes.webhooks import webhooks_bp
-from routes.internal import internal_bp
 
 # Reload of .env to be sure
 load_dotenv(override=True)
@@ -63,6 +64,7 @@ def create_app():
 
     db.init_app(app)
     mail.init_app(app)
+    migrate = Migrate(app, db)
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"

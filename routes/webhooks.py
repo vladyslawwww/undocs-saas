@@ -30,6 +30,7 @@ def stripe_webhook():
         # Project ID passed in client_reference_id
         project_id = session.get("client_reference_id")
         stripe_sub_id = session.get("subscription")
+        stripe_customer_id = session.get("customer")
 
         if project_id:
             project = db.session.get(Project, int(project_id))
@@ -37,6 +38,7 @@ def stripe_webhook():
                 print(f"💰 WEBHOOK: Activating Project {project.id}")
                 project.subscription_status = "active"
                 project.stripe_subscription_id = stripe_sub_id
+                project.stripe_customer_id = stripe_customer_id
                 db.session.commit()
 
     # 2. Payment Failed
