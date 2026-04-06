@@ -145,6 +145,8 @@ def create_workspace():
         )
         db.session.add(new_project)
 
+        db.session.flush()
+
         # 3. CONSUME TRIAL FLAG
         current_user.has_used_trial = True
 
