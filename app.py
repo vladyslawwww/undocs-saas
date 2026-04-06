@@ -11,6 +11,7 @@ from routes.auth import auth_bp
 from routes.internal import internal_bp
 from routes.main import main_bp
 from routes.webhooks import webhooks_bp
+from services.keep_alive import start_keep_alive
 
 # Reload of .env to be sure
 load_dotenv(override=True)
@@ -88,6 +89,10 @@ def create_app():
             "favicon.svg",
             mimetype="image/svg+xml",
         )
+
+    # Start the keep-alive thread ONLY in production
+    if os.getenv("ENV") == "production" or not app.debug:
+        start_keep_alive()
 
     # with app.app_context():
     #     db.create_all()
