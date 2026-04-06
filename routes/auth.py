@@ -128,41 +128,69 @@ def onboarding_choice():
 @auth_bp.route("/create-workspace", methods=["GET", "POST"])
 @login_required
 def create_workspace():
-    # 1. SECURITY/UX: Prevent even seeing the form if trial is used
-    if current_user.has_used_trial:
-        flash(
-            "You have already used your free trial workspace. Please upgrade to Pro.",
-            "warning",
-        )
-        return redirect(url_for("main.dashboard"))
+    import stripe
 
     if request.method == "POST":
         project_name = request.form.get("project_name")
 
-        # 2. CREATE TRIAL PROJECT
-        new_project = Project(
-            name=project_name, subscription_status="trial", page_limit=10
-        )
-        db.session.add(new_project)
-        db.session.flush()
+        if not current_user.has_used_trial:
+            # --- PATH A: THE ONE-TIME FREE TRIAL ---
+            new_project = Project(
+                name=project_name, subscription_status="trial", page_limit=10
+            )
+            db.session.add(new_project)
+            db.session.flush()
 
-        # 2. Hard-set the trial flag
-        user = db.session.get(User, current_user.id)  # Fetch a fresh instance
-        user.has_used_trial = True
-        db.session.add(user)  # Explicitly mark user as updated
+            # Mark trial as consumed
+            current_user.has_used_trial = True
 
-        # 3. Add membership
-        mem = ProjectMembership(
-            user_id=user.id, project_id=new_project.id, role="owner"
-        )
-        db.session.add(mem)
+            mem = ProjectMembership(
+                user_id=current_user.id, project_id=new_project.id, role="owner"
+            )
+            db.session.add(mem)
+            db.session.commit()
 
-        db.session.commit()
+            flash(f"Workspace '{project_name}' created! Trial active.", "success")
+            return redirect(url_for("main.project_view", project_id=new_project.id))
 
-        flash(f"Workspace '{project_name}' created successfully!", "success")
-        return redirect(url_for("main.project_view", project_id=new_project.id))
+        else:
+            # --- PATH B: THE UNLIMITED PRO WORKSPACE ---
+            # 1. Create the Project (Inactive until payment)
+            new_project = Project(
+                name=project_name,
+                subscription_status="pending_payment",
+                page_limit=1000,
+            )
+            db.session.add(new_project)
+            db.session.flush()
 
-    # 5. This handles the GET request
+            # 2. Add User as Owner
+            mem = ProjectMembership(
+                user_id=current_user.id, project_id=new_project.id, role="owner"
+            )
+            db.session.add(mem)
+            db.session.commit()
+
+            # 3. Create Stripe Session
+            try:
+                checkout_session = stripe.checkout.Session.create(
+                    payment_method_types=["card"],
+                    line_items=[
+                        {
+                            "price": os.getenv("STRIPE_PRO_PRICE_ID"),
+                            "quantity": 1,
+                        }
+                    ],
+                    mode="subscription",
+                    client_reference_id=str(new_project.id),
+                    success_url=os.getenv("BASE_URL") + "/workspace/success",
+                    cancel_url=os.getenv("BASE_URL") + "/dashboard",
+                )
+                return redirect(checkout_session.url, code=303)
+            except Exception as e:
+                flash(f"Stripe Error: {str(e)}", "danger")
+                return redirect(url_for("auth.create_workspace"))
+
     return render_template("setup_project.html")
 
 

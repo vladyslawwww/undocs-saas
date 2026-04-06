@@ -342,68 +342,22 @@
         </div>
       </div>
     </div>
-    {% endfor %} {% if not current_user.has_used_trial %}
-    <!-- THE CREATE WORKSPACE CARD -->
-    <a
-      href="{{ url_for('auth.create_workspace') }}"
-      class="group relative rounded-2xl border-2 border-dashed border-slate-200 p-8 flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/50 transition duration-300 h-full"
-    >
-      <div
-        class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition mb-4"
-      >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          ></path>
+    {% endfor %} 
+    <a href="{{ url_for('auth.create_workspace') }}" class="group relative rounded-2xl border-2 border-dashed border-slate-200 p-8 flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/50 transition duration-300 h-full">
+    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-      </div>
-      <span
-        class="text-sm font-bold text-slate-600 group-hover:text-blue-700 transition"
-        >Create Workspace</span
-      >
-      <p
-        class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold"
-      >
-        10 Free Extractions
-      </p>
-    </a>
-    {% else %}
-    <!-- THE "UPGRADE" CARD (Shown after trial used) -->
-    <div
-      class="rounded-2xl border border-slate-100 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center h-full opacity-80"
-    >
-      <div
-        class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-300 mb-4 shadow-sm"
-      >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          ></path>
-        </svg>
-      </div>
-      <span class="text-sm font-bold text-slate-400">Trial Consumed</span>
-      <p class="text-[10px] text-slate-500 mt-2 px-4 italic leading-tight">
-        You've used your free trial. To create more workspaces, upgrade an
-        existing one to Pro.
-      </p>
     </div>
+    
+    {% if not current_user.has_used_trial %}
+        <span class="text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Create Free Trial</span>
+        <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold font-mono">10 free pages</p>
+    {% else %}
+        <span class="text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Add Pro Workspace</span>
+        <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold font-mono">$20 / Month</p>
     {% endif %}
+</a>
   </div>
   {% else %}
   <!-- Empty State -->

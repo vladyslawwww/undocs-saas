@@ -8,38 +8,53 @@
             <p class="text-slate-500 text-lg">How would you like to get started?</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <!-- OPTION 1: CREATE (Owner) -->
-            <a href="{{ url_for('auth.create_workspace') }}" class="group relative bg-white p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 shadow-sm hover:shadow-xl transition-all duration-300">
-                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+
+            <!-- THE CREATE CARD -->
+            <a href="{{ url_for('auth.create_workspace') }}"
+                class="group bg-white border-2 border-slate-100 p-10 rounded-3xl shadow-sm hover:border-blue-500 hover:shadow-xl transition-all duration-300 text-center flex flex-col items-center">
+                <div
+                    class="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-slate-900 mb-2">Create Workspace</h3>
-                <p class="text-slate-500 mb-6 min-h-[50px]">
-                    For teams and business owners. Set up a paid workspace (1000 pages/mo) and invite your team.
+
+                {% if not current_user.has_used_trial %}
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">Start Free Trial</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">
+                    Create your first workspace and get <span class="text-blue-600 font-bold">10 free pages</span> of AI
+                    data extraction. No credit card required.
                 </p>
-                <div class="flex items-center text-blue-600 font-bold">
-                    Start Subscription &rarr;
-                </div>
+                {% else %}
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">Create Pro Workspace</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">
+                    You've used your free trial. Create a new professional workspace with <span
+                        class="text-slate-900 font-bold">1,000 pages</span> for $20/mo.
+                </p>
+                {% endif %}
             </a>
 
-            <!-- OPTION 2: JOIN (Member) -->
-            <a href="{{ url_for('auth.join_workspace') }}" class="group relative bg-white p-8 rounded-2xl border-2 border-transparent hover:border-purple-500 shadow-sm hover:shadow-xl transition-all duration-300">
-                <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <!-- THE JOIN CARD (Static) -->
+            <a href="{{ url_for('auth.join_workspace') }}"
+                class="group bg-slate-900 border-2 border-slate-900 p-10 rounded-3xl shadow-sm hover:bg-slate-800 hover:border-slate-800 hover:shadow-xl transition-all duration-300 text-center flex flex-col items-center">
+                <div
+                    class="w-20 h-20 bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-slate-900 mb-2">Join a Team</h3>
-                <p class="text-slate-500 mb-6 min-h-[50px]">
-                    Have an invitation code? Join an existing workspace for free.
+                <h3 class="text-2xl font-bold text-white mb-2">Join a Team</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Have an invitation code? Join an existing workspace to collaborate with your team and process
+                    documents together.
                 </p>
-                <div class="flex items-center text-purple-600 font-bold">
-                    Enter Code &rarr;
-                </div>
             </a>
-
         </div>
-        
+
         <div class="text-center mt-12">
             <a href="{{ url_for('auth.logout') }}" class="text-slate-400 hover:text-slate-600 text-sm">Log out</a>
         </div>
