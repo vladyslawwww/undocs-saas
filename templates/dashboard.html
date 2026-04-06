@@ -1,233 +1,454 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mx-auto px-4 md:px-6 py-8 md:py-12">
-
-    <!-- Welcome Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-4 md:gap-6">
-        <div>
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-            <p class="text-slate-500 mt-2 text-base md:text-lg">Welcome back, <span
-                    class="text-slate-800 font-semibold">{{ current_user.username }}</span>.</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <!-- JOIN BUTTON (Secondary) -->
-            <a href="{{ url_for('auth.join_workspace') }}"
-                class="flex-grow md:flex-grow-0 justify-center bg-white text-slate-600 border border-slate-200 px-5 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                </svg>
-                Join Team
-            </a>
-
-            <!-- CREATE BUTTON (Primary) -->
-            <a href="{{ url_for('auth.create_workspace') }}"
-                class="flex-grow md:flex-grow-0 justify-center bg-slate-900 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/10 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                New Workspace
-            </a>
-        </div>
+  <!-- Welcome Header -->
+  <div
+    class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-4 md:gap-6"
+  >
+    <div>
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+        Dashboard
+      </h1>
+      <p class="text-slate-500 mt-2 text-base md:text-lg">
+        Welcome back,
+        <span class="text-slate-800 font-semibold"
+          >{{ current_user.username }}</span
+        >.
+      </p>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
-        <div class="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div
-                class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                    </path>
-                </svg>
-            </div>
-            <div>
-                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Workspaces</p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-900">{{ stats.projs }}</p>
-            </div>
-        </div>
-        <div class="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div
-                class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                </svg>
-            </div>
-            <div>
-                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Documents</p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-900">{{ stats.total }}</p>
-            </div>
-        </div>
-        <div class="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-            <div
-                class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
-                <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <div>
-                <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pending Review
-                </p>
-                <p class="text-2xl md:text-3xl font-bold text-slate-900">{{ stats.pending }}</p>
-            </div>
-        </div>
+    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+      <!-- JOIN BUTTON (Secondary) -->
+      <a
+        href="{{ url_for('auth.join_workspace') }}"
+        class="flex-grow md:flex-grow-0 justify-center bg-white text-slate-600 border border-slate-200 px-5 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+          ></path>
+        </svg>
+        Join Team
+      </a>
+
+      <!-- CREATE BUTTON (Primary) -->
+      <a
+        href="{{ url_for('auth.create_workspace') }}"
+        class="flex-grow md:flex-grow-0 justify-center bg-slate-900 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/10 flex items-center gap-2"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          ></path>
+        </svg>
+        New Workspace
+      </a>
     </div>
+  </div>
 
-    <!-- Projects Grid -->
-    <h2 class="text-lg md:text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-        Your Workspaces
-        <span class="bg-slate-100 text-slate-500 text-xs px-2.5 py-1 rounded-md border border-slate-200">{{
-            projects|length }}</span>
-    </h2>
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+    <div
+      class="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4"
+    >
+      <div
+        class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center"
+      >
+        <svg
+          class="w-6 h-6 md:w-7 md:h-7"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          ></path>
+        </svg>
+      </div>
+      <div>
+        <p
+          class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1"
+        >
+          Workspaces
+        </p>
+        <p class="text-2xl md:text-3xl font-bold text-slate-900">
+          {{ stats.projs }}
+        </p>
+      </div>
+    </div>
+    <div
+      class="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4"
+    >
+      <div
+        class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center"
+      >
+        <svg
+          class="w-6 h-6 md:w-7 md:h-7"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          ></path>
+        </svg>
+      </div>
+      <div>
+        <p
+          class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1"
+        >
+          Documents
+        </p>
+        <p class="text-2xl md:text-3xl font-bold text-slate-900">
+          {{ stats.total }}
+        </p>
+      </div>
+    </div>
+    <div
+      class="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4"
+    >
+      <div
+        class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-yellow-50 text-yellow-600 flex items-center justify-center"
+      >
+        <svg
+          class="w-6 h-6 md:w-7 md:h-7"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </div>
+      <div>
+        <p
+          class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1"
+        >
+          Pending Review
+        </p>
+        <p class="text-2xl md:text-3xl font-bold text-slate-900">
+          {{ stats.pending }}
+        </p>
+      </div>
+    </div>
+  </div>
 
-    {% if projects %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for p in projects %}
-        
-        <!-- 1. DEFINE ACCESSIBILITY LOGIC -->
-        {% set status = p.project.subscription_status %}
-        {% set is_accessible = (status == 'active' or status == 'trial') %}
+  <!-- Projects Grid -->
+  <h2
+    class="text-lg md:text-xl font-bold text-slate-900 mb-6 flex items-center gap-3"
+  >
+    Your Workspaces
+    <span
+      class="bg-slate-100 text-slate-500 text-xs px-2.5 py-1 rounded-md border border-slate-200"
+      >{{ projects|length }}</span
+    >
+  </h2>
 
-        <div class="relative rounded-2xl border p-6 md:p-8 transition duration-300 h-full flex flex-col overflow-hidden group
-            {{ 'bg-white border-gray-200 hover:shadow-xl hover:border-blue-300 hover:shadow-blue-900/5' if is_accessible else 'bg-slate-50 border-slate-200' }}">
+  {% if projects %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for p in projects %}
 
-            <!-- 2. ENABLE LINK FOR TRIAL & ACTIVE -->
-            {% if is_accessible %}
-            <a href="{{ url_for('main.project_view', project_id=p.project.id) }}" class="absolute inset-0 z-10"></a>
-            {% endif %}
+    <!-- 1. DEFINE ACCESSIBILITY LOGIC -->
+    {% set status = p.project.subscription_status %} {% set is_accessible =
+    (status == 'active' or status == 'trial') %}
 
-            <!-- Decoration -->
-            {% if is_accessible %}
-            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-gray-50 to-white rounded-bl-full -mr-4 -mt-4 transition group-hover:from-blue-50 group-hover:to-white z-0">
-            </div>
-            {% endif %}
+    <div
+      class="relative rounded-2xl border p-6 md:p-8 transition duration-300 h-full flex flex-col overflow-hidden group
+            {{ 'bg-white border-gray-200 hover:shadow-xl hover:border-blue-300 hover:shadow-blue-900/5' if is_accessible else 'bg-slate-50 border-slate-200' }}"
+    >
+      <!-- 2. ENABLE LINK FOR TRIAL & ACTIVE -->
+      {% if is_accessible %}
+      <a
+        href="{{ url_for('main.project_view', project_id=p.project.id) }}"
+        class="absolute inset-0 z-10"
+      ></a>
+      {% endif %}
 
-            <div class="relative flex flex-col h-full justify-between pointer-events-none">
+      <!-- Decoration -->
+      {% if is_accessible %}
+      <div
+        class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-gray-50 to-white rounded-bl-full -mr-4 -mt-4 transition group-hover:from-blue-50 group-hover:to-white z-0"
+      ></div>
+      {% endif %}
 
-                <!-- 3. REMOVE GRAYSCALE FOR TRIAL -->
-                <div class="{{ 'opacity-60 grayscale' if not is_accessible }}">
-                    <div class="flex flex-wrap justify-between items-start mb-6 gap-2">
-                        <div class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border
+      <div
+        class="relative flex flex-col h-full justify-between pointer-events-none"
+      >
+        <!-- 3. REMOVE GRAYSCALE FOR TRIAL -->
+        <div class="{{ 'opacity-60 grayscale' if not is_accessible }}">
+          <div class="flex flex-wrap justify-between items-start mb-6 gap-2">
+            <div
+              class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border
                             {{ 'bg-slate-900 text-white border-slate-900' if p.role == 'owner' else 
                                'bg-purple-50 text-purple-700 border-purple-100' if p.role == 'admin' else 
-                               'bg-gray-50 text-gray-600 border-gray-200' }}">
-                            {{ p.role }}
-                        </div>
-
-                        <!-- 4. DYNAMIC STATUS BADGES -->
-                        <div class="flex items-center gap-2">
-                            {% if status == 'active' %}
-                                <div class="text-green-700 text-[10px] font-bold bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">PRO</div>
-                            {% elif status == 'trial' %}
-                                <div class="text-blue-700 text-[10px] font-bold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">TRIAL</div>
-                            {% else %}
-                                <div class="text-yellow-700 text-[10px] font-bold bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100">PAYMENT PENDING</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Quota Meter -->
-                    <div class="mb-6">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monthly Quota</span>
-                            <span class="text-[10px] font-bold text-slate-600">{{ p.project.pages_used }} / {{ p.project.page_limit }}</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                            <div class="h-1.5 rounded-full transition-all duration-700 
-                {% if p.usage_percent > 90 %}bg-red-500{% elif p.usage_percent > 70 %}bg-amber-500{% else %}bg-blue-600{% endif %}"
-                                style="width: {{ p.usage_percent }}%">
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-2 {{ 'group-hover:text-blue-600' if is_accessible }} transition truncate">
-                        {{ p.project.name }}
-                    </h3>
-                    <p class="text-sm text-slate-500">
-                        Processed <strong class="text-slate-700">{{ p.doc_count }}</strong> documents.
-                    </p>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
-                    {% if is_accessible %}
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Open Workspace</span>
-                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center {{ 'group-hover:bg-blue-600 group-hover:text-white' if is_accessible }} transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                        </svg>
-                    </div>
-                    {% else %}
-                    <!-- If Locked (Inactive/Pending Payment) -->
-                    <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider flex items-center gap-1">
-                        Action Needed
-                    </span>
-
-                    <div class="flex items-center gap-2 relative z-20 pointer-events-auto">
-                        {% if p.role == 'owner' %}
-                        <form action="{{ url_for('main.delete_project', project_id=p.project.id) }}" method="POST"
-                            onsubmit="return confirm('Are you sure you want to discard this workspace?');">
-                            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-slate-400 hover:text-red-600 hover:border-red-200 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </form>
-                        <a href="{{ url_for('auth.retry_payment', project_id=p.project.id) }}" class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-700 transition">
-                            Pay Now
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
+                               'bg-gray-50 text-gray-600 border-gray-200' }}"
+            >
+              {{ p.role }}
             </div>
+
+            <!-- 4. DYNAMIC STATUS BADGES -->
+            <div class="flex items-center gap-2">
+              {% if status == 'active' %}
+              <div
+                class="text-green-700 text-[10px] font-bold bg-green-50 px-2.5 py-1 rounded-lg border border-green-100"
+              >
+                PRO
+              </div>
+              {% elif status == 'trial' %}
+              <div
+                class="text-blue-700 text-[10px] font-bold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100"
+              >
+                TRIAL
+              </div>
+              {% else %}
+              <div
+                class="text-yellow-700 text-[10px] font-bold bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100"
+              >
+                PAYMENT PENDING
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Quota Meter -->
+          <div class="mb-6">
+            <div class="flex justify-between items-center mb-1.5">
+              <span
+                class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                >Monthly Quota</span
+              >
+              <span class="text-[10px] font-bold text-slate-600"
+                >{{ p.project.pages_used }} / {{ p.project.page_limit }}</span
+              >
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div
+                class="h-1.5 rounded-full transition-all duration-700 {% if p.usage_percent > 90 %}bg-red-500{% elif p.usage_percent > 70 %}bg-amber-500{% else %}bg-blue-600{% endif %}"
+                style="width: {{ p.usage_percent }}%"
+              ></div>
+            </div>
+          </div>
+
+          <h3
+            class="text-xl md:text-2xl font-bold text-slate-900 mb-2 {{ 'group-hover:text-blue-600' if is_accessible }} transition truncate"
+          >
+            {{ p.project.name }}
+          </h3>
+          <p class="text-sm text-slate-500">
+            Processed
+            <strong class="text-slate-700">{{ p.doc_count }}</strong> documents.
+          </p>
         </div>
-        {% endfor %}
 
-        <!-- Add New Card -->
-        <a href="{{ url_for('auth.create_workspace') }}" class="block group h-full">
-            <div
-                class="h-full bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/30 transition duration-300 flex flex-col items-center justify-center p-8 cursor-pointer min-h-[250px]">
-                <div
-                    class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition border border-gray-100">
-                    <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </div>
-                <span class="font-bold text-slate-500 group-hover:text-blue-600 transition">Create New Workspace</span>
-            </div>
-        </a>
-    </div>
-    {% else %}
-    <!-- Empty State -->
-    <div class="text-center py-12 md:py-24 bg-white rounded-3xl border border-dashed border-gray-200">
-        <div class="w-16 h-16 md:w-20 md:h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-8 h-8 md:w-10 md:h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                </path>
+        <div
+          class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between"
+        >
+          {% if is_accessible %}
+          <span
+            class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >Open Workspace</span
+          >
+          <div
+            class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center {{ 'group-hover:bg-blue-600 group-hover:text-white' if is_accessible }} transition"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              ></path>
             </svg>
-        </div>
-        <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2">No Workspaces Found</h3>
-        <p class="text-slate-500 mb-8 max-w-xs md:max-w-sm mx-auto text-sm md:text-base">Get started by creating a
-            workspace or joining a team.</p>
+          </div>
+          {% else %}
+          <!-- If Locked (Inactive/Pending Payment) -->
+          <span
+            class="text-xs font-bold text-yellow-600 uppercase tracking-wider flex items-center gap-1"
+          >
+            Action Needed
+          </span>
 
-        <div class="flex flex-col md:flex-row gap-4 justify-center">
-            <a href="{{ url_for('auth.create_workspace') }}"
-                class="inline-block bg-blue-600 text-white px-6 md:px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">Create
-                Workspace</a>
-            <a href="{{ url_for('auth.join_workspace') }}"
-                class="inline-block bg-white text-slate-600 border border-slate-200 px-6 md:px-8 py-3 rounded-xl font-bold hover:bg-gray-50 transition">Join
-                with Code</a>
+          <div
+            class="flex items-center gap-2 relative z-20 pointer-events-auto"
+          >
+            {% if p.role == 'owner' %}
+            <form
+              action="{{ url_for('main.delete_project', project_id=p.project.id) }}"
+              method="POST"
+              onsubmit="
+                return confirm(
+                  'Are you sure you want to discard this workspace?',
+                );
+              "
+            >
+              <button
+                type="submit"
+                class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-slate-400 hover:text-red-600 hover:border-red-200 transition"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  ></path>
+                </svg>
+              </button>
+            </form>
+            <a
+              href="{{ url_for('auth.retry_payment', project_id=p.project.id) }}"
+              class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-700 transition"
+            >
+              Pay Now
+            </a>
+            {% endif %}
+          </div>
+          {% endif %}
         </div>
+      </div>
+    </div>
+    {% endfor %} {% if not current_user.has_used_trial %}
+    <!-- THE CREATE WORKSPACE CARD -->
+    <a
+      href="{{ url_for('auth.create_workspace') }}"
+      class="group relative rounded-2xl border-2 border-dashed border-slate-200 p-8 flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/50 transition duration-300 h-full"
+    >
+      <div
+        class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition mb-4"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          ></path>
+        </svg>
+      </div>
+      <span
+        class="text-sm font-bold text-slate-600 group-hover:text-blue-700 transition"
+        >Create Workspace</span
+      >
+      <p
+        class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold"
+      >
+        10 Free Extractions
+      </p>
+    </a>
+    {% else %}
+    <!-- THE "UPGRADE" CARD (Shown after trial used) -->
+    <div
+      class="rounded-2xl border border-slate-100 bg-slate-50/50 p-8 flex flex-col items-center justify-center text-center h-full opacity-80"
+    >
+      <div
+        class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-300 mb-4 shadow-sm"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+      </div>
+      <span class="text-sm font-bold text-slate-400">Trial Consumed</span>
+      <p class="text-[10px] text-slate-500 mt-2 px-4 italic leading-tight">
+        You've used your free trial. To create more workspaces, upgrade an
+        existing one to Pro.
+      </p>
     </div>
     {% endif %}
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div
+    class="text-center py-12 md:py-24 bg-white rounded-3xl border border-dashed border-gray-200"
+  >
+    <div
+      class="w-16 h-16 md:w-20 md:h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6"
+    >
+      <svg
+        class="w-8 h-8 md:w-10 md:h-10 text-gray-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+        ></path>
+      </svg>
+    </div>
+    <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-2">
+      No Workspaces Found
+    </h3>
+    <p
+      class="text-slate-500 mb-8 max-w-xs md:max-w-sm mx-auto text-sm md:text-base"
+    >
+      Get started by creating a workspace or joining a team.
+    </p>
 
+    <div class="flex flex-col md:flex-row gap-4 justify-center">
+      <a
+        href="{{ url_for('auth.create_workspace') }}"
+        class="inline-block bg-blue-600 text-white px-6 md:px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+        >Create Workspace</a
+      >
+      <a
+        href="{{ url_for('auth.join_workspace') }}"
+        class="inline-block bg-white text-slate-600 border border-slate-200 px-6 md:px-8 py-3 rounded-xl font-bold hover:bg-gray-50 transition"
+        >Join with Code</a
+      >
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

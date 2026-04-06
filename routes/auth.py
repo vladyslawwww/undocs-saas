@@ -144,17 +144,19 @@ def create_workspace():
             name=project_name, subscription_status="trial", page_limit=10
         )
         db.session.add(new_project)
-
         db.session.flush()
 
-        # 3. CONSUME TRIAL FLAG
-        current_user.has_used_trial = True
+        # 2. Hard-set the trial flag
+        user = db.session.get(User, current_user.id)  # Fetch a fresh instance
+        user.has_used_trial = True
+        db.session.add(user)  # Explicitly mark user as updated
 
-        # 4. ADD MEMBERSHIP
+        # 3. Add membership
         mem = ProjectMembership(
-            user_id=current_user.id, project_id=new_project.id, role="owner"
+            user_id=user.id, project_id=new_project.id, role="owner"
         )
         db.session.add(mem)
+
         db.session.commit()
 
         flash(f"Workspace '{project_name}' created successfully!", "success")
